@@ -1,7 +1,5 @@
 # Anteract
 
-A small Next.js + React frontend for the INF 151 UCI hangout project.
-One page, three sample activity cards, category filters, and Join/Leave buttons.
 
 ## Run locally
 
