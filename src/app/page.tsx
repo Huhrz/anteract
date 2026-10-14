@@ -21,7 +21,7 @@ export default function Home() {
   return (
     <>
       <header className="header">
-        <a className="brand" href="/" aria-label="Anteract home"><span className="brand-mark" aria-hidden="true">a.</span>anteract</a>
+        <a className="brand" href="/" aria-label="Anteract home"><span className="brand-mark" aria-hidden="true"><img src="/anteater.svg" alt="" width="31" height="31" /></span>anteract</a>
         <span className="campus">Made for UCI students</span>
       </header>
       <main>
@@ -30,7 +30,7 @@ export default function Home() {
           <h1 id="page-title">Find your people.<br /><span>Start with a hangout.</span></h1>
           <p className="intro">Study together, grab a bite, or take a campus break.<br className="desktop-break" /> Meeting someone new starts with something simple.</p>
           <a className="primary hero-link" href="#hangouts">Explore hangouts <span aria-hidden="true">↓</span></a>
-          <div className="hero-decoration" aria-hidden="true"><span>Say hello.</span><div className="orbit">a.</div><span>Go do something.</span></div>
+          <div className="hero-decoration" aria-hidden="true"><span>Say hello.</span><div className="orbit"><img src="/anteater.svg" alt="" width="132" height="132" /></div><span>Go do something.</span></div>
         </section>
 
         <section className="activities" id="hangouts" aria-labelledby="hangouts-title">
