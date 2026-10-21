@@ -428,3 +428,73 @@ a.person-row:hover { border-color: #8eacbf; }
 @media (max-width: 1150px) { .story-collage { right: -75px; transform: scale(.85); transform-origin: top right; } .welcome-headline h1 { font-size: 61px; } .welcome-entry { padding-left: 9%; padding-right: 9%; } .welcome-story { min-height: 850px; } }
 @media (max-width: 760px) { .welcome-page { grid-template-columns: 1fr; } .welcome-story { min-height: 530px; border-right: 0; border-bottom: 1px solid #e4e7e5; } .welcome-brand { top: 25px; left: 6%; font-size: 25px; } .welcome-brand > span:first-child { width: 39px; height: 39px; } .story-collage { top: 90px; right: 0; transform: scale(.65); } .welcome-headline { left: 6%; bottom: 65px; } .welcome-headline h1 { font-size: 54px; letter-spacing: -2.7px; } .welcome-eyebrow { font-size: 8px; letter-spacing: 1px; } .welcome-headline > p:last-child { font-size: 11px; } .story-footnote { left: 6%; bottom: 23px; font-size: 9px; } .welcome-entry { padding: 24px max(7%, calc((100vw - 450px) / 2)) 25px; } .entry-content { padding: 30px 0 40px; } .entry-content h2 { font-size: 35px; } .welcome-bottom { font-size: 9px; } }
 @media (max-width: 420px) { .story-collage { right: -53px; transform: scale(.55); } .welcome-story { min-height: 490px; } .welcome-headline h1 { font-size: 47px; } .welcome-headline { bottom: 60px; } .welcome-headline > p:last-child { font-size: 10px; } }
+
+/* A quieter, editorial welcome: text and imagery each have their own space. */
+.welcome-story.story-editorial { min-height: 100svh; padding: 43px 8% 35px; display: flex; flex-direction: column; background: #f7f8f4; overflow: visible; }
+.story-editorial .welcome-brand { position: static; align-self: flex-start; flex-shrink: 0; }
+.editorial-content { width: 100%; max-width: 650px; margin: auto; padding-top: 65px; }
+.editorial-heading .welcome-eyebrow { margin-bottom: 21px; color: #74816e; font-size: 9px; letter-spacing: 1.8px; }
+.editorial-heading h1 { color: #192f42; font-size: clamp(36px, 3.6vw, 60px); line-height: 1.09; letter-spacing: -2.5px; }
+.editorial-heading h1 span { color: #1a6094; font-weight: 700; }
+.editorial-heading > p:last-child { color: #73808a; font-size: 13px; line-height: 1.85; margin: 22px 0 30px; }
+.editorial-photo { position: relative; margin: 0; width: 100%; aspect-ratio: 1.7; overflow: hidden; border-radius: 18px; background: #d9ddd3; }
+.editorial-photo > img { width: 100%; height: 100%; object-fit: cover; object-position: center 48%; display: block; }
+.editorial-photo::after { content: ""; position: absolute; inset: 55% 0 0; background: linear-gradient(transparent, #122c39a6); pointer-events: none; }
+.editorial-photo figcaption { position: absolute; z-index: 1; bottom: 21px; left: 24px; right: 24px; display: flex; justify-content: space-between; align-items: center; gap: 12px; color: white; font-size: 11px; font-weight: 500; }
+.editorial-photo figcaption > span:last-child { font-size: 22px; color: #ffdb79; }
+.editorial-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 22px; font-size: 10px; color: #849087; }
+.editorial-accent { color: #bd982e; font-size: 18px; }
+@media (min-width: 1500px) { .editorial-content { padding-top: 80px; padding-bottom: 35px; } .editorial-heading > p:last-child { margin-bottom: 38px; font-size: 14px; } }
+@media (max-width: 1000px) { .welcome-story.story-editorial { padding-left: 7%; padding-right: 7%; } .editorial-heading h1 { font-size: 39px; letter-spacing: -1.7px; } .editorial-break { display: none; } .editorial-photo { aspect-ratio: 1.3; } }
+@media (max-width: 760px) { .welcome-story.story-editorial { min-height: auto; padding: 25px 7% 28px; overflow: hidden; } .editorial-content { max-width: 500px; padding-top: 42px; margin: 0 auto; } .editorial-heading h1 { font-size: clamp(34px, 7vw, 48px); } .editorial-heading .welcome-eyebrow { margin-bottom: 16px; font-size: 8px; } .editorial-heading > p:last-child { font-size: 12px; margin: 17px 0 24px; } .editorial-photo { aspect-ratio: 1.9; border-radius: 14px; } .editorial-photo figcaption { bottom: 16px; left: 18px; right: 18px; font-size: 10px; } .editorial-footer { margin-top: 15px; font-size: 9px; } }
+
+/* Upright social cards, with a dedicated lane for the headline. */
+.welcome-story.story-social { min-height: 850px; background: white; padding: 43px 5% 38px; display: flex; flex-direction: column; overflow: hidden; }
+.story-social .welcome-brand { position: static; flex-shrink: 0; align-self: flex-start; }
+.social-stage { position: relative; container-type: inline-size; width: 100%; max-width: 900px; aspect-ratio: .98; margin: auto; }
+.social-headline { position: absolute; left: 0; bottom: 1%; width: 36%; font-size: 8.8cqw; line-height: 1.02; letter-spacing: -.055em; color: #14191d; }
+.social-headline span { font-weight: 700; color: #1460a2; }
+.social-collage { position: absolute; inset: 0 0 0 38%; }
+.social-coast, .social-friends, .social-coffee { position: absolute; overflow: hidden; border-radius: 17px; box-shadow: 0 3px 14px #102c391c; }
+.social-coast > img, .social-friends > img, .social-portrait img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.social-coast { left: 0; top: 25%; width: 57%; height: 36%; }
+.social-coast > span { position: absolute; left: 12px; top: 12px; color: white; font-size: 25px; }
+.social-friends { right: 3%; top: 8%; width: 66%; height: 65%; background: #adc3ba; }
+.social-friends > img { object-position: 54% center; }
+.social-friends::after { content: ""; position: absolute; inset: 50% 0 0; background: linear-gradient(transparent,#1736429c); }
+.social-progress { position: absolute; top: 14px; left: 13px; right: 13px; display: flex; gap: 3px; }
+.social-progress i { height: 3px; background: #ffffff80; border-radius: 5px; flex: 1; }
+.social-progress i:first-child { background: white; }
+.social-story-caption { position: absolute; bottom: 16%; left: 10%; z-index: 1; color: white; font-size: 4.2cqw; line-height: 1.05; font-weight: 700; letter-spacing: -.04em; }
+.social-reply { position: absolute; bottom: 4%; left: 8%; right: 8%; display: flex; align-items: center; gap: 7px; z-index: 1; }
+.social-reply span { height: 20px; border: 1.5px solid white; border-radius: 20px; flex: 1; }
+.social-reply i { width: 20px; height: 20px; border: 1.5px solid white; border-radius: 50%; }
+.social-coffee { top: 54%; left: 12%; width: 49%; background: white; padding: 12px; z-index: 2; }
+.social-coffee-icon { display: inline-grid; place-items: center; background: #f8d66c; width: 27px; height: 27px; border-radius: 8px; font-size: 17px; margin-bottom: 12px; }
+.social-coffee > img { width: 100%; aspect-ratio: 1; display: block; object-fit: cover; border-radius: 9px; }
+.social-card-line { display: block; background: #edf0f1; height: 8px; margin-top: 10px; border-radius: 6px; }
+.social-card-line.short { width: 65%; margin-top: 6px; }
+.social-portrait { position: absolute; left: 51%; top: 79%; width: 35%; aspect-ratio: 1; border-radius: 50%; border: 3px solid #1765ac; padding: 4px; background: white; z-index: 3; box-shadow: 0 3px 10px #102c391a; }
+.social-portrait img { border-radius: 50%; }
+.social-smile { position: absolute; top: 13%; left: -13%; color: #edbb35; font-size: 9cqw; line-height: 1; }
+.social-heart { position: absolute; right: -4%; top: 60%; display: grid; place-items: center; width: 9cqw; aspect-ratio: 1; border-radius: 50%; color: white; background: #f3bd3e; font-size: 5.5cqw; z-index: 2; }
+.social-plan { position: absolute; right: -4%; top: 21%; background: #164e7d; color: white; padding: 9px 12px; font-size: 1.9cqw; border-radius: 11px; }
+.social-plan > span { margin-left: 5px; color: #ffdc76; }
+@media (min-width: 1500px) { .welcome-story.story-social { min-height: 950px; } }
+@media (max-width: 1000px) { .welcome-story.story-social { min-height: 850px; padding-left: 6%; padding-right: 6%; } .social-coffee { padding: 8px; } .social-plan { padding: 7px 9px; } }
+@media (max-width: 760px) { .welcome-story.story-social { min-height: 0; padding: 25px 7% 30px; } .social-stage { max-width: 520px; margin: 26px auto 0; aspect-ratio: 1.05; } .social-headline { font-size: 8.8cqw; } .social-coast, .social-friends, .social-coffee { border-radius: 12px; } .social-coffee-icon { width: 23px; height: 23px; font-size: 14px; margin-bottom: 8px; } .social-reply span { height: 15px; } .social-reply i { width: 15px; height: 15px; } .social-card-line { height: 6px; margin-top: 7px; } .social-portrait { padding: 3px; } }
+
+/* Keep the desktop composition within the visible screen, including the headline. */
+@media (min-width: 761px) {
+  .welcome-story.story-social {
+    min-height: 0;
+    height: 100svh;
+    padding-top: clamp(24px, 4svh, 43px);
+    padding-bottom: 32px;
+  }
+  .story-social .social-stage {
+    width: min(100%, calc((100svh - 150px) * .98));
+    flex-shrink: 0;
+    margin: 16px auto auto;
+  }
+}

@@ -9,18 +9,20 @@ export default function Home() {
   function changeMode(next: typeof mode) { setMode(next); setNotice(""); }
 
   return <div className="welcome-page">
-    <section className="welcome-story" aria-labelledby="page-title">
+    <section className="welcome-story story-social" aria-labelledby="page-title">
       <Link className="welcome-brand" href="/" aria-label="Anteract home"><span><img src="/anteater.svg" alt="" width="36" height="36" /></span>anteract<span className="brand-period">.</span></Link>
-      <div className="story-collage" aria-label="Shared moments, new friendships">
-        <div className="sun-sticker" aria-hidden="true">✳</div>
-        <div className="moment-card coast-moment"><img src="/coast.jpg" alt="Waves along the California coast" /><span className="moment-label">a little off-campus adventure ↗</span></div>
-        <div className="moment-card friends-moment"><img src="/campus-friends.jpg" alt="Students spending an afternoon together outside" /><div className="story-progress"><i /><i /><i /></div><span className="photo-location">⌖ &nbsp; Better together</span><div className="photo-caption">Same campus.<br />New connections.</div></div>
-        <div className="plan-sticker"><span className="plan-icon">☕</span><div><strong>Coffee between classes?</strong><span>Your next friendship starts here.</span></div><span className="plan-arrow">↗</span></div>
-        <span className="hello-sticker">say hello! <span>↗</span></span>
-        <div className="heart-sticker" aria-hidden="true">♡</div>
-        <div className="zot-sticker"><img src="/anteater.svg" alt="" width="62" height="62" /><span>ZOT ZOT!</span></div>
+      <div className="social-stage">
+        <div className="social-collage" aria-label="New friends, coffee plans, and adventures">
+          <div className="social-coast"><img src="/coast.jpg" alt="An afternoon on the California coast" /><span aria-hidden="true">⌖</span></div>
+          <div className="social-friends"><img src="/campus-friends.jpg" alt="Students laughing together in a library" /><div className="social-progress" aria-hidden="true"><i /><i /><i /></div><div className="social-story-caption">Better<br />together.</div><div className="social-reply" aria-hidden="true"><span /><i /><i /></div></div>
+          <div className="social-coffee"><span className="social-coffee-icon" aria-hidden="true">☕</span><img src="/coffee.jpg" alt="Coffee for a break between classes" /><span className="social-card-line" /><span className="social-card-line short" /></div>
+          <div className="social-portrait"><img src="/student-portrait.jpg" alt="A smiling student" /></div>
+          <span className="social-smile" aria-hidden="true">☀</span>
+          <span className="social-heart" aria-hidden="true">♥</span>
+          <span className="social-plan">Coffee? <span aria-hidden="true">↗</span></span>
+        </div>
+        <h1 className="social-headline" id="page-title">Find<br />the<br />people<br /><span>you click<br />with.</span></h1>
       </div>
-      <div className="welcome-headline"><p className="welcome-eyebrow">YOUR CAMPUS. YOUR PEOPLE.</p><h1 id="page-title">A little hello.<br />A whole lot of<br /><span>possibility.</span></h1><p>Find your study buddy, your adventure crew,<br />or someone who just gets you.</p></div>
     </section>
     <section className="welcome-entry" aria-labelledby="entry-title">
       <span className="uci-badge"><span>✦</span> EXCLUSIVELY UCI</span>
