@@ -8,6 +8,10 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { state, ready, storageError } = useDemo();
   const links = [{ href: "/", label: "Home" }, { href: "/events", label: "Browse Events" }, { href: "/my-events", label: "My Events" }];
+  if (pathname === "/") return <>
+    <a className="skip-link" href="#main-content">Skip to content</a>
+    <main id="main-content" className="welcome-main">{children}</main>
+  </>;
   return <>
     <a className="skip-link" href="#main-content">Skip to content</a>
     <header className="header">
