@@ -336,3 +336,20 @@ a.person-row:hover { border-color: #8eacbf; }
   .suggestion { font-size: 10px; padding: 10px; }
   footer { width: calc(100% - 40px); margin: 36px 20px 0; flex-direction: column; }
 }
+
+/* Account safety controls share the profile and conversation entry points. */
+.account-safety { max-width: 100%; }
+.safety-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.safety-danger { color: #a32c35; }
+.safety-status { font-size: 12px; line-height: 1.6; max-width: 440px; }
+.safety-status:empty { display: none; }
+.safety-dialog { width: min(520px, calc(100% - 32px)); max-height: 85dvh; overflow-y: auto; border: 1px solid #dce3eb; border-radius: 20px; padding: 28px; color: #18344b; }
+.safety-dialog::backdrop { background: rgb(13 32 49 / 55%); }
+.safety-dialog h2 { margin-top: 0; }
+.safety-dialog p { line-height: 1.6; }
+.safety-dialog label { display: grid; gap: 8px; margin: 18px 0; font-weight: 600; }
+.safety-dialog select, .safety-dialog textarea { width: 100%; padding: 12px; font: inherit; color: inherit; border: 1px solid #acb9c6; border-radius: 8px; background: white; }
+.safety-dialog textarea { resize: vertical; }
+.safety-dialog .safety-checkbox { display: flex; align-items: center; font-weight: 400; }
+.chat-header { flex-wrap: wrap; gap: 12px; }
+@media (max-width: 600px) { .profile-heading { flex-wrap: wrap; } .safety-dialog { padding: 20px; } }

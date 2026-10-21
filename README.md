@@ -53,3 +53,11 @@ Agenda and demo messages survive refresh in this browser's localStorage. Updates
 This is a frontend demo with no authentication, database, real reservations, or real message delivery. Pages label the demo clearly. Messages only appear in the sender's own browser; there are no automated fake replies.
 
 Replace sample data in `hangouts.ts` with backend event/profile data and connect the actions in `demo-state.ts` to server calls. Update shared state after a successful response, with loading/error feedback. The server must own authentication, capacity, unique membership, allowed attendance transitions, and conversation access. Keep the current routes and shared components as the UI integration points.
+
+## Account safety
+
+Profiles and chats offer Report account and Block account controls. Reports require a reason, allow up to 2,000 characters of optional details, and offer blocking in the same step. A confirmation explains blocking before it is applied. Unblock from the same profile or chat. Blocking disables composing and sending messages, including in the shared state reducer, and marks the conversation as blocked. Existing messages and shared event attendance remain available.
+
+Blocks and reports persist in this browser alongside the agenda. These are demo controls: reports are not delivered to moderators and blocks do not affect another device or person. If storage fails, changes last only for this session.
+
+For production, authenticate the acting account on the server, store reports in a private moderation queue with access controls, and enforce blocks on both message delivery and conversation access in both directions. Never rely on browser state for enforcement or disclose the reporter to the reported account.
