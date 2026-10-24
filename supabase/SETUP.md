@@ -5,11 +5,12 @@ The app uses Supabase Auth through supabase-js and SSR cookies. No ORM or databa
 1. Put your project URL and publishable key in `.env.local` using `.env.example`. Restart the dev server after changing these values. Set the same variables in your hosting environment.
 2. In Supabase Authentication, enable Email/password and **Confirm email**. Use a minimum password length of 8 or more.
 3. Apply `supabase/migrations/202610230001_uci_auth_hook.sql` in the Supabase SQL editor (or via your Supabase migration workflow). In Authentication > Hooks, enable **Before User Created**, choose the Postgres function `public.restrict_uci_signup`. Running the SQL alone does not enable the hook.
-4. In Authentication > URL Configuration set Site URL to your deployed app URL (use `http://localhost:3000` during local development). Allow these redirect URLs for each actual origin:
+4. Apply `supabase/migrations/202610240001_profiles.sql` to create the profile table and private profile-photo bucket. The `/profile` page lets a signed-in student edit their display name, major, class year, interests, and photo. `/profiles/<user-id>` displays the profile to signed-in UCI students. Photos must be JPG, PNG, or WebP and no larger than 5 MB.
+5. In Authentication > URL Configuration set Site URL to your deployed app URL (use `http://localhost:3000` during local development). Allow these redirect URLs for each actual origin:
    - `http://localhost:3000/auth/callback`
    - `http://localhost:3000/auth/callback?next=/auth/reset-password`
    - The equivalent two URLs on your production origin.
-5. For confirmation links that also work when opened in a different browser, edit the email templates to use these links:
+6. For confirmation links that also work when opened in a different browser, edit the email templates to use these links:
 
    Confirm signup:
    `<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup">Confirm your email</a>`
@@ -18,13 +19,14 @@ The app uses Supabase Auth through supabase-js and SSR cookies. No ORM or databa
    `<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery">Reset your password</a>`
 
    The callback route also supports the default PKCE email flow, which requires the link to open in the browser that requested it. Set Site URL to the environment you are testing when using the custom templates.
-6. Configure custom SMTP before inviting real students. Supabase's default mail service restricts recipients and sending volume; a real UCI address may not receive mail until SMTP is configured.
+7. Configure custom SMTP before inviting real students. Supabase's default mail service restricts recipients and sending volume; a real UCI address may not receive mail until SMTP is configured.
 
 ## Validate before launch
 
 - Attempt a non-UCI signup directly against Supabase Auth: the hook must reject it, even without the website.
 - Sign up with a UCI address you control. Before confirmation, login must fail.
 - Confirm the email, then log in. the home page (`/`) should load; refreshing should retain the session.
+- Apply the profiles migration, open `/profile`, save profile details and a photo, then use the profile link to view it. A different signed-in UCI account can view the profile but cannot edit it.
 - Open `/events`, `/my-events`, a profile, or a chat in a signed-out browser: it should redirect to `/login`.
 - Request a reset, follow its email link, change the password, and log in with the new password.
 - Repeat signup for a confirmed account: the empty-identities response or duplicate-account error should switch to login and explain that the account already exists. Unconfirmed accounts can still receive confirmation emails.

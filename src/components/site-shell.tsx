@@ -10,7 +10,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [logoutError, setLogoutError] = useState("");
   const { state, ready, storageError } = useDemo();
-  const links = [{ href: "/", label: "Home" }, { href: "/events", label: "Browse Events" }, { href: "/my-events", label: "My Events" }];
+  const links = [{ href: "/", label: "Home" }, { href: "/events", label: "Browse Events" }, { href: "/my-events", label: "My Events" }, { href: "/profile", label: "My Profile" }];
   if (pathname === "/login" || pathname.startsWith("/auth/")) return <>
     <a className="skip-link" href="#main-content">Skip to content</a>
     <main id="main-content" className="welcome-main">{children}</main>
@@ -34,6 +34,6 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     {logoutError && <p className="storage-warning" role="alert">{logoutError}</p>}
     {storageError && <p className="storage-warning" role="status">This browser can’t save your demo. Changes will last until you refresh.</p>}
     <main id="main-content">{children}</main>
-    <footer><span>anteract · A little more connected.</span><span>Frontend demo · Sample events & profiles · Messages stay on this device.</span></footer>
+    <footer><span>anteract · A little more connected.</span><span>Sample events and messaging are demo features.</span></footer>
   </>;
 }
