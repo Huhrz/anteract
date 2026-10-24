@@ -353,3 +353,152 @@ a.person-row:hover { border-color: #8eacbf; }
 .safety-dialog .safety-checkbox { display: flex; align-items: center; font-weight: 400; }
 .chat-header { flex-wrap: wrap; gap: 12px; }
 @media (max-width: 600px) { .profile-heading { flex-wrap: wrap; } .safety-dialog { padding: 20px; } }
+
+/* Anteract welcome */
+.welcome-main { max-width: none; padding: 0; margin: 0; background: #fff; }
+.welcome-page { min-height: 100svh; display: grid; grid-template-columns: 56% 44%; color: #192f42; }
+.welcome-story { position: relative; min-height: 850px; overflow: hidden; background: #f9faf7; border-right: 1px solid #e4e7e5; }
+.welcome-brand { position: absolute; left: 7%; top: 43px; display: flex; align-items: center; gap: 10px; font-size: 29px; letter-spacing: -1.3px; font-weight: 800; z-index: 2; }
+.welcome-brand > span:first-child { width: 46px; height: 46px; border-radius: 50%; background: #ffd458; display: grid; place-items: center; }
+.welcome-brand .brand-period { color: #d6a527; margin-left: -9px; }
+.story-collage { position: absolute; width: 490px; height: 590px; top: 125px; right: 1%; }
+.moment-card { position: absolute; overflow: hidden; border: 6px solid white; border-radius: 23px; box-shadow: 0 9px 25px #16384c17; }
+.moment-card > img { width: 100%; height: 100%; object-fit: cover; }
+.coast-moment { width: 222px; height: 290px; top: 113px; left: 15px; transform: rotate(-10deg); }
+.coast-moment img { object-position: 48% center; }
+.moment-label { position: absolute; bottom: 17px; left: 12px; right: 12px; color: white; font-size: 10px; font-weight: 700; }
+.friends-moment { width: 280px; height: 397px; right: 17px; top: 5px; transform: rotate(6deg); background: #5c8379; }
+.friends-moment img { object-position: 52% center; }
+.friends-moment::after { content: ""; position: absolute; inset: 40% 0 0; background: linear-gradient(transparent,#142c35a6); }
+.story-progress { display: flex; gap: 4px; position: absolute; top: 14px; left: 14px; right: 14px; }
+.story-progress i { flex: 1; height: 3px; background: #ffffff70; border-radius: 4px; }
+.story-progress i:first-child { background: white; }
+.photo-location { position: absolute; top: 33px; left: 16px; color: white; font-size: 10px; font-weight: 600; }
+.photo-caption { position: absolute; bottom: 24px; left: 20px; color: white; font-size: 27px; line-height: 1.13; font-weight: 700; letter-spacing: -.7px; z-index: 1; }
+.sun-sticker { position: absolute; left: 43px; top: 6px; color: #edbb36; font-size: 98px; transform: rotate(8deg); }
+.plan-sticker { position: absolute; top: 378px; left: 89px; display: flex; gap: 12px; align-items: center; background: white; border: 1px solid #edf0e9; border-radius: 16px; padding: 18px 16px; box-shadow: 0 8px 25px #16384c14; transform: rotate(-5deg); z-index: 2; }
+.plan-icon { background: #f9ebc6; border-radius: 12px; padding: 11px; font-size: 22px; }
+.plan-sticker strong { display: block; font-size: 12px; }
+.plan-sticker div > span { display: block; font-size: 9px; color: #78838a; margin-top: 6px; }
+.plan-arrow { margin-left: 10px; font-size: 22px; color: #a08739; }
+.hello-sticker { position: absolute; right: 0; top: 69px; border-radius: 8px; padding: 11px 14px; background: #153e63; color: white; font-size: 17px; font-weight: 700; transform: rotate(12deg); box-shadow: 0 4px 10px #00000010; }
+.hello-sticker span { color: #ffd458; }
+.heart-sticker { position: absolute; right: 5px; top: 330px; width: 66px; height: 66px; background: #f4c848; color: #173d5d; border: 5px solid #fff; border-radius: 50%; font-size: 45px; text-align: center; line-height: 56px; transform: rotate(14deg); z-index: 3; }
+.zot-sticker { position: absolute; right: 40px; top: 459px; transform: rotate(12deg); display: flex; flex-direction: column; align-items: center; }
+.zot-sticker span { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; margin-top: 3px; }
+.welcome-headline { position: absolute; left: 7%; bottom: 115px; z-index: 3; pointer-events: none; }
+.welcome-eyebrow { font-size: 9px; letter-spacing: 2px; color: #75816f; font-weight: 700; margin: 0 0 20px; }
+.welcome-headline h1 { font-size: clamp(49px, 5vw, 77px); line-height: 1.01; letter-spacing: -3.7px; color: #192f42; }
+.welcome-headline h1 span { color: #1460a2; font-weight: 700; }
+.welcome-headline > p:last-child { font-size: 13px; color: #73808a; line-height: 1.8; margin: 22px 0 0; }
+.story-footnote { position: absolute; bottom: 35px; left: 7%; color: #7a858b; font-size: 10px; }
+.story-footnote span { color: #c29c30; margin-left: 15px; }
+.welcome-entry { padding: 45px 11% 30px; display: flex; flex-direction: column; min-width: 0; }
+.uci-badge { align-self: flex-end; font-size: 9px; font-weight: 700; letter-spacing: 1.6px; color: #65766a; display: flex; align-items: center; gap: 7px; }
+.uci-badge > span { color: #b89126; font-size: 17px; }
+.entry-content { margin: auto 0; padding: 65px 0; width: 100%; }
+.entry-kicker { font-size: 9px; letter-spacing: 2px; color: #8a9399; font-weight: 700; margin: 0 0 16px; }
+.entry-content h2 { font-size: clamp(29px, 2.8vw, 42px); line-height: 1.2; letter-spacing: -1.5px; }
+.entry-content h2 > span { color: #e4b43a; font-size: 33px; }
+.entry-description { font-size: 13px; color: #7a858e; line-height: 1.7; margin: 12px 0 34px; }
+.welcome-form { display: flex; flex-direction: column; }
+.welcome-form label { font-size: 11px; font-weight: 600; margin-bottom: 10px; }
+.welcome-form input { border: 1px solid #dce1e4; border-radius: 11px; padding: 18px; font-size: 13px; color: #18344b; background: #fff; width: 100%; margin-bottom: 20px; height: 57px; }
+.welcome-form input::placeholder { color: #a0a8ae; }
+.welcome-submit { margin-top: 5px; display: flex; justify-content: center; align-items: center; gap: 15px; min-height: 51px; border: 0; border-radius: 28px; color: white; background: #164e7d; font-weight: 600; font-size: 13px; }
+.welcome-submit:hover { background: #0e3a60; }
+.welcome-submit span { font-size: 20px; }
+.forgot-link { display: block; border: 0; background: transparent; color: #62727e; font-size: 11px; margin: 20px auto 0; padding: 4px; }
+.forgot-link:hover { text-decoration: underline; }
+.entry-divider { display: flex; align-items: center; gap: 15px; margin: 35px 0 24px; }
+.entry-divider span { height: 1px; background: #e7eaec; flex: 1; }
+.entry-divider p { font-size: 8px; letter-spacing: 1.4px; color: #929a9f; white-space: nowrap; }
+.welcome-create { background: white; border: 1px solid #164e7d; color: #164e7d; border-radius: 28px; min-height: 51px; width: 100%; font-size: 12px; font-weight: 600; }
+.welcome-create:hover { background: #f1f6f9; }
+.explore-preview { display: block; text-align: center; margin-top: 21px; color: #7b868e; font-size: 11px; }
+.explore-preview span { margin-left: 8px; }
+.explore-preview:hover { color: #164e7d; }
+.entry-trust { text-align: center; margin: 37px 0 0; color: #77877a; font-size: 10px; }
+.entry-trust > span { margin-right: 5px; }
+.entry-demo { text-align: center; font-size: 9px; color: #939ca3; margin-top: 10px; }
+.entry-notice { font-size: 12px; line-height: 1.7; color: #164e7d; padding: 12px; background: #edf3f7; border-radius: 9px; }
+.welcome-bottom { display: flex; justify-content: space-between; gap: 12px; font-size: 9px; color: #919a9f; }
+.welcome-bottom .gold-dot { margin-left: 7px; }
+@media (min-width: 1500px) { .welcome-story { min-height: 950px; } .story-collage { right: 5%; top: 150px; transform: scale(1.15); transform-origin: top right; } .welcome-headline { bottom: 130px; } }
+@media (max-width: 1150px) { .story-collage { right: -75px; transform: scale(.85); transform-origin: top right; } .welcome-headline h1 { font-size: 61px; } .welcome-entry { padding-left: 9%; padding-right: 9%; } .welcome-story { min-height: 850px; } }
+@media (max-width: 760px) { .welcome-page { grid-template-columns: 1fr; } .welcome-story { min-height: 530px; border-right: 0; border-bottom: 1px solid #e4e7e5; } .welcome-brand { top: 25px; left: 6%; font-size: 25px; } .welcome-brand > span:first-child { width: 39px; height: 39px; } .story-collage { top: 90px; right: 0; transform: scale(.65); } .welcome-headline { left: 6%; bottom: 65px; } .welcome-headline h1 { font-size: 54px; letter-spacing: -2.7px; } .welcome-eyebrow { font-size: 8px; letter-spacing: 1px; } .welcome-headline > p:last-child { font-size: 11px; } .story-footnote { left: 6%; bottom: 23px; font-size: 9px; } .welcome-entry { padding: 24px max(7%, calc((100vw - 450px) / 2)) 25px; } .entry-content { padding: 30px 0 40px; } .entry-content h2 { font-size: 35px; } .welcome-bottom { font-size: 9px; } }
+@media (max-width: 420px) { .story-collage { right: -53px; transform: scale(.55); } .welcome-story { min-height: 490px; } .welcome-headline h1 { font-size: 47px; } .welcome-headline { bottom: 60px; } .welcome-headline > p:last-child { font-size: 10px; } }
+
+/* A quieter, editorial welcome: text and imagery each have their own space. */
+.welcome-story.story-editorial { min-height: 100svh; padding: 43px 8% 35px; display: flex; flex-direction: column; background: #f7f8f4; overflow: visible; }
+.story-editorial .welcome-brand { position: static; align-self: flex-start; flex-shrink: 0; }
+.editorial-content { width: 100%; max-width: 650px; margin: auto; padding-top: 65px; }
+.editorial-heading .welcome-eyebrow { margin-bottom: 21px; color: #74816e; font-size: 9px; letter-spacing: 1.8px; }
+.editorial-heading h1 { color: #192f42; font-size: clamp(36px, 3.6vw, 60px); line-height: 1.09; letter-spacing: -2.5px; }
+.editorial-heading h1 span { color: #1a6094; font-weight: 700; }
+.editorial-heading > p:last-child { color: #73808a; font-size: 13px; line-height: 1.85; margin: 22px 0 30px; }
+.editorial-photo { position: relative; margin: 0; width: 100%; aspect-ratio: 1.7; overflow: hidden; border-radius: 18px; background: #d9ddd3; }
+.editorial-photo > img { width: 100%; height: 100%; object-fit: cover; object-position: center 48%; display: block; }
+.editorial-photo::after { content: ""; position: absolute; inset: 55% 0 0; background: linear-gradient(transparent, #122c39a6); pointer-events: none; }
+.editorial-photo figcaption { position: absolute; z-index: 1; bottom: 21px; left: 24px; right: 24px; display: flex; justify-content: space-between; align-items: center; gap: 12px; color: white; font-size: 11px; font-weight: 500; }
+.editorial-photo figcaption > span:last-child { font-size: 22px; color: #ffdb79; }
+.editorial-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 22px; font-size: 10px; color: #849087; }
+.editorial-accent { color: #bd982e; font-size: 18px; }
+@media (min-width: 1500px) { .editorial-content { padding-top: 80px; padding-bottom: 35px; } .editorial-heading > p:last-child { margin-bottom: 38px; font-size: 14px; } }
+@media (max-width: 1000px) { .welcome-story.story-editorial { padding-left: 7%; padding-right: 7%; } .editorial-heading h1 { font-size: 39px; letter-spacing: -1.7px; } .editorial-break { display: none; } .editorial-photo { aspect-ratio: 1.3; } }
+@media (max-width: 760px) { .welcome-story.story-editorial { min-height: auto; padding: 25px 7% 28px; overflow: hidden; } .editorial-content { max-width: 500px; padding-top: 42px; margin: 0 auto; } .editorial-heading h1 { font-size: clamp(34px, 7vw, 48px); } .editorial-heading .welcome-eyebrow { margin-bottom: 16px; font-size: 8px; } .editorial-heading > p:last-child { font-size: 12px; margin: 17px 0 24px; } .editorial-photo { aspect-ratio: 1.9; border-radius: 14px; } .editorial-photo figcaption { bottom: 16px; left: 18px; right: 18px; font-size: 10px; } .editorial-footer { margin-top: 15px; font-size: 9px; } }
+
+/* Upright social cards, with a dedicated lane for the headline. */
+.welcome-story.story-social { min-height: 850px; background: white; padding: 43px 5% 38px; display: flex; flex-direction: column; overflow: hidden; }
+.story-social .welcome-brand { position: static; flex-shrink: 0; align-self: flex-start; }
+.social-stage { position: relative; container-type: inline-size; width: 100%; max-width: 900px; aspect-ratio: .98; margin: auto; }
+.social-headline { position: absolute; left: 0; bottom: 1%; width: 36%; font-size: 8.8cqw; line-height: 1.02; letter-spacing: -.055em; color: #14191d; }
+.social-headline span { font-weight: 700; color: #1460a2; }
+.social-collage { position: absolute; inset: 0 0 0 38%; }
+.social-coast, .social-friends, .social-coffee { position: absolute; overflow: hidden; border-radius: 17px; box-shadow: 0 3px 14px #102c391c; }
+.social-coast > img, .social-friends > img, .social-portrait img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.social-coast { left: 0; top: 25%; width: 57%; height: 36%; }
+.social-coast > span { position: absolute; left: 12px; top: 12px; color: white; font-size: 25px; }
+.social-friends { right: 3%; top: 8%; width: 66%; height: 65%; background: #adc3ba; }
+.social-friends > img { object-position: 54% center; }
+.social-friends::after { content: ""; position: absolute; inset: 50% 0 0; background: linear-gradient(transparent,#1736429c); }
+.social-progress { position: absolute; top: 14px; left: 13px; right: 13px; display: flex; gap: 3px; }
+.social-progress i { height: 3px; background: #ffffff80; border-radius: 5px; flex: 1; }
+.social-progress i:first-child { background: white; }
+.social-story-caption { position: absolute; bottom: 16%; left: 10%; z-index: 1; color: white; font-size: 4.2cqw; line-height: 1.05; font-weight: 700; letter-spacing: -.04em; }
+.social-reply { position: absolute; bottom: 4%; left: 8%; right: 8%; display: flex; align-items: center; gap: 7px; z-index: 1; }
+.social-reply span { height: 20px; border: 1.5px solid white; border-radius: 20px; flex: 1; }
+.social-reply i { width: 20px; height: 20px; border: 1.5px solid white; border-radius: 50%; }
+.social-coffee { top: 54%; left: 12%; width: 49%; background: white; padding: 12px; z-index: 2; }
+.social-coffee-icon { display: inline-grid; place-items: center; background: #f8d66c; width: 27px; height: 27px; border-radius: 8px; font-size: 17px; margin-bottom: 12px; }
+.social-coffee > img { width: 100%; aspect-ratio: 1; display: block; object-fit: cover; border-radius: 9px; }
+.social-card-line { display: block; background: #edf0f1; height: 8px; margin-top: 10px; border-radius: 6px; }
+.social-card-line.short { width: 65%; margin-top: 6px; }
+.social-portrait { position: absolute; left: 51%; top: 79%; width: 35%; aspect-ratio: 1; border-radius: 50%; border: 3px solid #1765ac; padding: 4px; background: white; z-index: 3; box-shadow: 0 3px 10px #102c391a; }
+.social-portrait img { border-radius: 50%; }
+.social-smile { position: absolute; top: 13%; left: -13%; color: #edbb35; font-size: 9cqw; line-height: 1; }
+.social-heart { position: absolute; right: -4%; top: 60%; display: grid; place-items: center; width: 9cqw; aspect-ratio: 1; border-radius: 50%; color: white; background: #f3bd3e; font-size: 5.5cqw; z-index: 2; }
+.social-plan { position: absolute; right: -4%; top: 21%; background: #164e7d; color: white; padding: 9px 12px; font-size: 1.9cqw; border-radius: 11px; }
+.social-plan > span { margin-left: 5px; color: #ffdc76; }
+@media (min-width: 1500px) { .welcome-story.story-social { min-height: 950px; } }
+@media (max-width: 1000px) { .welcome-story.story-social { min-height: 850px; padding-left: 6%; padding-right: 6%; } .social-coffee { padding: 8px; } .social-plan { padding: 7px 9px; } }
+@media (max-width: 760px) { .welcome-story.story-social { min-height: 0; padding: 25px 7% 30px; } .social-stage { max-width: 520px; margin: 26px auto 0; aspect-ratio: 1.05; } .social-headline { font-size: 8.8cqw; } .social-coast, .social-friends, .social-coffee { border-radius: 12px; } .social-coffee-icon { width: 23px; height: 23px; font-size: 14px; margin-bottom: 8px; } .social-reply span { height: 15px; } .social-reply i { width: 15px; height: 15px; } .social-card-line { height: 6px; margin-top: 7px; } .social-portrait { padding: 3px; } }
+
+/* Keep the desktop composition within the visible screen, including the headline. */
+@media (min-width: 761px) {
+  .welcome-story.story-social {
+    min-height: 0;
+    height: 100svh;
+    padding-top: clamp(24px, 4svh, 43px);
+    padding-bottom: 32px;
+  }
+  .story-social .social-stage {
+    width: min(100%, calc((100svh - 150px) * .98));
+    flex-shrink: 0;
+    margin: 16px auto auto;
+  }
+}
+
+.password-reset { max-width: 460px; margin: 10svh auto; padding: 24px; }
+.password-reset h1 { font-size: 36px; }
+.password-reset .entry-notice:empty { display: none; }
