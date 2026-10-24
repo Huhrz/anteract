@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { usePathname } from "next/navigation";
 import { useDemo } from "./demo-provider";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [logoutError, setLogoutError] = useState("");
   const { state, ready, storageError } = useDemo();
   const links = [{ href: "/", label: "Home" }, { href: "/events", label: "Browse Events" }, { href: "/my-events", label: "My Events" }];
-  if (pathname === "/") return <>
+  if (pathname === "/login" || pathname.startsWith("/auth/")) return <>
     <a className="skip-link" href="#main-content">Skip to content</a>
     <main id="main-content" className="welcome-main">{children}</main>
   </>;
@@ -20,8 +23,15 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         const active = link.href === "/" ? pathname === "/" : pathname === link.href || pathname.startsWith(`${link.href}/`);
         return <Link key={link.href} href={link.href} className={active ? "nav-link active" : "nav-link"} aria-current={active ? "page" : undefined}>{link.label}{link.href === "/my-events" && ready && Object.keys(state.memberships).length > 0 && <span className="nav-count">{Object.keys(state.memberships).length}</span>}</Link>;
       })}</nav>
-      <span className="campus"><span className="campus-dot" /> UCI student demo</span>
+      <button className="quiet-button" onClick={async () => {
+        try {
+          const { error } = await createClient().auth.signOut();
+          if (error) throw error;
+          window.location.assign("/login");
+        } catch { setLogoutError("Could not log out. Please try again."); }
+      }}>Log out</button>
     </header>
+    {logoutError && <p className="storage-warning" role="alert">{logoutError}</p>}
     {storageError && <p className="storage-warning" role="status">This browser can’t save your demo. Changes will last until you refresh.</p>}
     <main id="main-content">{children}</main>
     <footer><span>anteract · A little more connected.</span><span>Frontend demo · Sample events & profiles · Messages stay on this device.</span></footer>

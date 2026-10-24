@@ -24,9 +24,11 @@ The app uses Supabase Auth through supabase-js and SSR cookies. No ORM or databa
 
 - Attempt a non-UCI signup directly against Supabase Auth: the hook must reject it, even without the website.
 - Sign up with a UCI address you control. Before confirmation, login must fail.
-- Confirm the email, then log in. `/events` should load; refreshing should retain the session.
-- Open `/events`, `/my-events`, a profile, or a chat in a signed-out browser: it should redirect to `/`.
+- Confirm the email, then log in. the home page (`/`) should load; refreshing should retain the session.
+- Open `/events`, `/my-events`, a profile, or a chat in a signed-out browser: it should redirect to `/login`.
 - Request a reset, follow its email link, change the password, and log in with the new password.
+- Repeat signup for a confirmed account: the empty-identities response or duplicate-account error should switch to login and explain that the account already exists. Unconfirmed accounts can still receive confirmation emails.
+- Recovery callbacks use the PKCE recovery marker as well as `next=/auth/reset-password`. Codes redirected to the Site URL (`/` or `/login`) are forwarded to the callback. Keep the redirect allowlist configured; this fallback only works on the same app origin and browser that requested the link.
 - Try an expired/used link: it should show an error. Log out and check protected routes again.
 
 ## Scope
@@ -36,3 +38,5 @@ Authentication is connected. Existing event, membership, safety, and messaging f
 The signup hook restricts account creation. Protected app routes also check the current verified email so changing to another domain cannot grant app access. Future database policies must independently enforce that rule. UCI email ownership does not establish current enrollment.
 
 Never expose a secret/service-role key in a NEXT_PUBLIC variable. No administrative key is required by this implementation.
+
+The app home is `/`; authentication lives at `/login`. Successful login and signup confirmation lead home. Signed-out visitors to app pages go to `/login`.

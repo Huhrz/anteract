@@ -498,3 +498,7 @@ a.person-row:hover { border-color: #8eacbf; }
     margin: 16px auto auto;
   }
 }
+
+.password-reset { max-width: 460px; margin: 10svh auto; padding: 24px; }
+.password-reset h1 { font-size: 36px; }
+.password-reset .entry-notice:empty { display: none; }
