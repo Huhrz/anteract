@@ -1,8 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import { EventCard } from "@/components/event-card";
-import { hangouts } from "@/lib/hangouts";
+import { useEvents } from "@/components/event-provider";
 
 export default function Home() {
+  const { events, loading } = useEvents();
   return <>
     <section className="hero" aria-labelledby="page-title">
       <p className="eyebrow">YOUR CAMPUS. YOUR PEOPLE.</p>
@@ -18,7 +21,7 @@ export default function Home() {
     </section>
     <section className="activities" aria-labelledby="hangouts-title">
       <div className="section-heading"><div><p className="eyebrow">A LITTLE INSPIRATION</p><h2 id="hangouts-title">Good plans, better company.</h2></div><Link className="text-link" href="/events">Browse all events →</Link></div>
-      <div className="cards home-cards">{hangouts.map(event => <EventCard key={event.id} event={event} />)}</div>
+      {loading ? <p className="loading-state" role="status">Loading events…</p> : events.length ? <div className="cards home-cards">{events.slice(0, 3).map(event => <EventCard key={event.id} event={event} />)}</div> : <p className="body-copy">No events yet. <Link className="text-link" href="/events/new">Create the first event →</Link></p>}
     </section>
   </>;
 }
