@@ -1,4 +1,4 @@
-import type { CampusLocationId } from "./campus-map";
+import type { CampusLocationId, CampusMapPlace } from "./campus-map";
 
 export const categories = ["All", "Study", "Food", "Active"] as const;
 export type Category = (typeof categories)[number];
@@ -9,6 +9,7 @@ export type Hangout = {
   category: Exclude<Category, "All">;
   location: string;
   campusLocationId?: CampusLocationId;
+  campusMapPlace?: CampusMapPlace;
   time: string;
   description: string;
   participants: number;

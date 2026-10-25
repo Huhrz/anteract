@@ -2,23 +2,31 @@ import { getCampusMap } from "@/lib/campus-map";
 import type { Hangout } from "@/lib/hangouts";
 
 export function CampusMap({ event }: { event: Hangout }) {
-  const { url, location } = getCampusMap(event.campusLocationId);
+  const { url, location } = getCampusMap(event.campusLocationId, event.campusMapPlace);
+  return <CampusMapPanel
+    url={url}
+    label={location?.label ?? event.location}
+    note={location?.note ?? `An exact pin hasn't been added for this event. Search for ${event.location} on the campus map.`}
+  />;
+}
+
+export function CampusMapPanel({ url, label, note }: { url: string; label: string; note: string }) {
   return (
-    <section className="campus-map" aria-label={`Map for ${event.location}`}>
+    <section className="campus-map" aria-label={`Map for ${label}`}>
       <div className="campus-map-heading">
         <div>
           <p className="eyebrow">FIND YOUR WAY</p>
-          <h3>{location?.label ?? event.location}</h3>
+          <h3>{label}</h3>
         </div>
         <span className="campus-map-badge">Official UCI map</span>
       </div>
       <p className="campus-map-note">
-        {location?.note ?? `An exact pin hasn't been added for this event. Search for ${event.location} on the campus map.`}
+        {note}
       </p>
       <iframe
         key={url}
         src={url}
-        title={`Official UCI map — ${location?.label ?? event.location}`}
+        title={`Official UCI map — ${label}`}
         className="campus-map-frame"
         loading="lazy"
         referrerPolicy="no-referrer"
