@@ -36,6 +36,27 @@ Membership follows `joined -> confirmed -> arrived`. Arrived is disabled until a
 
 Agenda and demo messages survive refresh in this browser's localStorage. Updates are not synchronized live between tabs or shared with teammates or other devices. If browser storage is blocked, an on-page notice explains that changes only last until refresh. Activity times such as "Today" are sample labels, not scheduled live events.
 
+## Campus map demo
+
+Open `/map-demo` to choose a location for one of three fictional sample events. No Supabase configuration or login is needed. There is no full event-creation form yet; this page demonstrates its location field. Existing event pages keep their authentication requirements.
+
+1. Enter a campus location name and press **Search UCI map**. The embedded official map displays real search results.
+2. For a quick match, press **Preview pin**, check the map, then **Use this location**. Quick matches are a small verified demo catalog (Science Library, Langson Library, ARC, Student Center, Aldrich Park, and Watson Bridge), not the live UCI index.
+3. For any other result, open the place in the official map, choose that location's Share icon, and copy its location link. Expand **Choose a different place from the official map**, enter the display name and link, preview the pin, then use it. A global map/search share link is not a location link.
+4. The event preview's name and map link update together. Changing to a different marker clears the old meeting instructions. Each sample event keeps its own draft while switching events; refreshing resets these drafts. Nothing is published or saved to the backend.
+
+Event cards, event details, and My Events now link their location text to the official UCI map. Details also embed the map below the meeting instructions. The full-map link stays available if embedding is blocked or slow. No map API key or SDK is needed.
+
+- Science Library opens the library building marker.
+- Aldrich Park opens the park landmark; the gathering point remains the entrance near Langson Library.
+- UTC opens Watson Bridge, a nearby campus landmark; the gathering point remains the UTC end of the bridge, not an arbitrary restaurant.
+
+`src/components/campus-location-picker.tsx` is the reusable selection field. It returns a `{ label, markerId }` place to the demo page. A selected event can store it as optional `campusMapPlace`; existing preset events use `campusLocationId`. Both render through the same map and event-location components. Link validation restricts imports to a single marker on UCI's official map and normalizes the URL. It cannot verify that the supplied name matches a real marker: the person must review the official preview before choosing.
+
+Search and marker URLs are documented by Concept3D: https://help.concept3d.com/hc/en-us/articles/115004127673-Interactive-Map-Query-Strings . Directly fetching search results needs separate API access; this demo does not extract the map's internal key, proxy private APIs, or read cross-origin iframe state. The real search runs within the official iframe; selections outside the quick catalog use the share-link handoff. These are landmark links, not live locations or route calculations.
+
+Official map: https://map.uci.edu/?id=463 . UCI's bridge reference: https://parking.uci.edu/traffic/access-clearance/ .
+
 ## Where to edit
 
 - `src/app/page.tsx`: Home.
