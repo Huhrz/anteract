@@ -36,6 +36,20 @@ Membership follows `joined -> confirmed -> arrived`. Arrived is disabled until a
 
 Agenda and demo messages survive refresh in this browser's localStorage. Updates are not synchronized live between tabs or shared with teammates or other devices. If browser storage is blocked, an on-page notice explains that changes only last until refresh. Activity times such as "Today" are sample labels, not scheduled live events.
 
+## Campus map demo
+
+Open `/map-demo` to try the official UCI map with three public, fictional sample events; this demo needs no Supabase configuration or login. Existing event pages keep their authentication requirements.
+
+Event cards, event details, and My Events now link their location text to the official UCI map. Details also embed the map below the meeting instructions. The full-map link stays available if embedding is blocked or slow. No map API key or SDK is needed.
+
+- Science Library opens the library building marker.
+- Aldrich Park opens the park landmark; the gathering point remains the entrance near Langson Library.
+- UTC opens Watson Bridge, a nearby campus landmark; the gathering point remains the UTC end of the bridge, not an arbitrary restaurant.
+
+Mappings are in `src/lib/campus-map.ts`, referenced by each event's optional `campusLocationId` in `src/lib/hangouts.ts`. For a future location without a verified pin, the component opens the general UCI map and asks the student to search. These are landmark links, not custom gathering pins, live locations, or route calculations.
+
+Official map: https://map.uci.edu/?id=463 . UCI's bridge reference: https://parking.uci.edu/traffic/access-clearance/ .
+
 ## Where to edit
 
 - `src/app/page.tsx`: Home.

@@ -1,3 +1,5 @@
+import type { CampusLocationId } from "./campus-map";
+
 export const categories = ["All", "Study", "Food", "Active"] as const;
 export type Category = (typeof categories)[number];
 
@@ -6,6 +8,7 @@ export type Hangout = {
   title: string;
   category: Exclude<Category, "All">;
   location: string;
+  campusLocationId?: CampusLocationId;
   time: string;
   description: string;
   participants: number;
@@ -37,9 +40,9 @@ export const people: Person[] = [
 
 // Replace this array with backend data when the team is ready.
 export const hangouts: Hangout[] = [
-  { id: "study-1", title: "A little study company", category: "Study", location: "Science Library", time: "Today · 4:00 PM", description: "Bring your notes. We'll keep each other focused and take a coffee break.", participants: 2, capacity: 5, hostId: "maya", attendeeIds: ["maya", "sam"], meetingPoint: "Meet outside the main entrance before finding a table together.", bring: "Your laptop, notes, and anything you want to work on." },
-  { id: "food-1", title: "Grab a bite at UTC", category: "Food", location: "University Town Center", time: "Today · 6:00 PM", description: "A casual dinner, a new face, and a good excuse to get off campus.", participants: 3, capacity: 6, hostId: "jordan", attendeeIds: ["jordan", "maya", "sam"], meetingPoint: "Meet at the UTC end of the pedestrian bridge. We'll choose a food spot together.", bring: "Your appetite! Everyone pays for their own meal." },
-  { id: "active-1", title: "Take a park break", category: "Active", location: "Aldrich Park", time: "Tomorrow · 10:00 AM", description: "An easy walk around campus. Come for some fresh air and conversation.", participants: 1, capacity: 4, hostId: "alex", attendeeIds: ["alex"], meetingPoint: "Meet at the park entrance near Langson Library for a relaxed 30-minute walk.", bring: "Comfortable shoes and a bottle of water." },
+  { id: "study-1", title: "A little study company", category: "Study", location: "Science Library", campusLocationId: "science-library", time: "Today · 4:00 PM", description: "Bring your notes. We'll keep each other focused and take a coffee break.", participants: 2, capacity: 5, hostId: "maya", attendeeIds: ["maya", "sam"], meetingPoint: "Meet outside the main entrance before finding a table together.", bring: "Your laptop, notes, and anything you want to work on." },
+  { id: "food-1", title: "Grab a bite at UTC", category: "Food", location: "University Town Center", campusLocationId: "utc-bridge", time: "Today · 6:00 PM", description: "A casual dinner, a new face, and a good excuse to get off campus.", participants: 3, capacity: 6, hostId: "jordan", attendeeIds: ["jordan", "maya", "sam"], meetingPoint: "Meet at the UTC end of the pedestrian bridge. We'll choose a food spot together.", bring: "Your appetite! Everyone pays for their own meal." },
+  { id: "active-1", title: "Take a park break", category: "Active", location: "Aldrich Park", campusLocationId: "aldrich-park", time: "Tomorrow · 10:00 AM", description: "An easy walk around campus. Come for some fresh air and conversation.", participants: 1, capacity: 4, hostId: "alex", attendeeIds: ["alex"], meetingPoint: "Meet at the park entrance near Langson Library for a relaxed 30-minute walk.", bring: "Comfortable shoes and a bottle of water." },
 ];
 
 export const symbols = { Study: "✎", Food: "☕", Active: "↗" };

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useDemo } from "@/components/demo-provider";
 import { hangouts, people, symbols } from "@/lib/hangouts";
+import { EventLocation } from "@/components/event-location";
 
 const filters = ["All", "Joined", "Confirmed", "Arrived"] as const;
 export default function MyEvents() {
@@ -21,7 +22,7 @@ export default function MyEvents() {
       const status = state.memberships[event.id];
       const host = people.find((person) => person.id === event.hostId)!;
       return <article className="agenda-card" key={event.id} aria-label={event.title}>
-        <div className="agenda-main"><div className={`agenda-icon ${event.category.toLowerCase()}`} aria-hidden="true">{symbols[event.category]}</div><div className="agenda-info"><p className="time">{event.time} <span className={`status-badge ${status}`}>{status === "arrived" ? "Arrived ✓" : status === "confirmed" ? "Confirmed ✓" : "Joined"}</span></p><h2><Link href={`/events/${event.id}`}>{event.title}</Link></h2><p className="location">⌖ {event.location}</p></div><Link className="details-link" href={`/events/${event.id}`}>View details ↗</Link></div>
+        <div className="agenda-main"><div className={`agenda-icon ${event.category.toLowerCase()}`} aria-hidden="true">{symbols[event.category]}</div><div className="agenda-info"><p className="time">{event.time} <span className={`status-badge ${status}`}>{status === "arrived" ? "Arrived ✓" : status === "confirmed" ? "Confirmed ✓" : "Joined"}</span></p><h2><Link href={`/events/${event.id}`}>{event.title}</Link></h2><p className="location"><EventLocation event={event} /></p></div><Link className="details-link" href={`/events/${event.id}`}>View details ↗</Link></div>
         <div className="agenda-bottom"><ol className="progress-steps" aria-label="Attendance progress"><li className="complete"><span>✓</span> Joined</li><li className={status !== "joined" ? "complete" : ""}><span>{status !== "joined" ? "✓" : "2"}</span> Confirm</li><li className={status === "arrived" ? "complete" : ""}><span>{status === "arrived" ? "✓" : "3"}</span> Arrived</li></ol><div className="attendance-actions"><button type="button" className="primary" disabled={status !== "joined"} onClick={() => dispatch({ type: "confirm", eventId: event.id })}>{status === "joined" ? "Confirm" : "Confirmed ✓"}</button><button type="button" className={status === "arrived" ? "secondary arrived-button" : "secondary"} disabled={status !== "confirmed"} onClick={() => dispatch({ type: "arrive", eventId: event.id })}>{status === "arrived" ? "Arrived ✓" : "Arrived"}</button></div></div>
         <div className="agenda-foot"><Link className="host-line" href={`/profiles/${host.id}`}><span className={`avatar tiny ${host.color}`}>{host.initials}</span><span>View {host.name.split(" ")[0]}’s profile & chat →</span></Link><button className="quiet-button" type="button" onClick={() => dispatch({ type: "leave", eventId: event.id })}>Leave event</button></div>
         <p className="attendance-note" role="status">{status === "joined" ? "First confirm you’re coming. Then mark Arrived when you reach the meeting point." : status === "confirmed" ? "You’re confirmed! Mark Arrived when you reach the meeting point." : "You’ve marked yourself as arrived. Say hello to your group!"}</p>
