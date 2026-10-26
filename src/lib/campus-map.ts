@@ -34,9 +34,60 @@ export const campusSearchPlaces = [
 const officialMapUrl = "https://map.uci.edu/?id=463";
 const markerPattern = /^[1-9]\d{0,9}$/;
 
+// A location the host picked. `place` is present when it is pinned on the
+// official UCI map; without it the event shows the name and a map search link.
+export type CampusChoice = { label: string; place?: CampusMapPlace };
+
+export const maxLocationLabel = 120;
+export const isValidMarkerId = (value: string) => markerPattern.test(value);
+export const normalizeLocationLabel = (value: string) => value.replace(/\s+/g, " ").trim();
+
+const ignoredWords = new Set(["the", "at", "of", "near", "in", "by", "uci"]);
+const plain = (value: string) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+const searchTokens = (value: string) => plain(value).split(" ").filter((word) => word && !ignoredWords.has(word));
+
+// Every typed word has to match something, so "sci lib" finds the Science
+// Library and "rec center" finds the ARC. Better matches come first.
+function scorePlace(place: (typeof campusSearchPlaces)[number], tokens: string[]) {
+  const phrases = [plain(place.label), ...place.aliases.map(plain)];
+  const words = phrases.flatMap((phrase) => phrase.split(" "));
+  const whole = tokens.join(" ");
+  let score = phrases.includes(whole) ? 200 : phrases.some((phrase) => phrase.startsWith(whole)) ? 80 : 0;
+  for (const token of tokens) {
+    if (words.includes(token)) score += 40;
+    else if (words.some((word) => word.startsWith(token))) score += 25;
+    else if (phrases.some((phrase) => phrase.includes(token))) score += 8;
+    else return 0;
+  }
+  return score;
+}
+
 export function searchDemoPlaces(query: string): CampusMapPlace[] {
-  const term = query.trim().toLowerCase();
-  return campusSearchPlaces.filter((place) => !term || place.label.toLowerCase().includes(term) || place.aliases.some((alias) => alias.includes(term)));
+  const tokens = searchTokens(query);
+  if (!tokens.length) return campusSearchPlaces.map(({ label, markerId }) => ({ label, markerId }));
+  return campusSearchPlaces
+    .map((place, order) => ({ place, order, score: scorePlace(place, tokens) }))
+    .filter((match) => match.score > 0)
+    .sort((a, b) => b.score - a.score || a.order - b.order)
+    .map(({ place }) => ({ label: place.label, markerId: place.markerId }));
+}
+
+// Splits text into pieces so the parts that match the search can be bold.
+export function highlightParts(text: string, query: string): { text: string; hit: boolean }[] {
+  const tokens = searchTokens(query);
+  const lower = text.toLowerCase();
+  if (!tokens.length || lower.length !== text.length) return [{ text, hit: false }];
+  const hits = new Array<boolean>(text.length).fill(false);
+  for (const token of tokens) {
+    for (let at = lower.indexOf(token); at !== -1; at = lower.indexOf(token, at + token.length)) hits.fill(true, at, at + token.length);
+  }
+  const parts: { text: string; hit: boolean }[] = [];
+  for (let i = 0; i < text.length; i++) {
+    const last = parts[parts.length - 1];
+    if (last && last.hit === hits[i]) last.text += text[i];
+    else parts.push({ text: text[i], hit: hits[i] });
+  }
+  return parts;
 }
 
 export function getCampusSearchUrl(query: string) {

@@ -23,7 +23,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         const active = link.href === "/" ? pathname === "/" : pathname === link.href || pathname.startsWith(`${link.href}/`);
         return <Link key={link.href} href={link.href} className={active ? "nav-link active" : "nav-link"} aria-current={active ? "page" : undefined}>{link.label}{link.href === "/my-events" && ready && Object.keys(state.memberships).length > 0 && <span className="nav-count">{Object.keys(state.memberships).length}</span>}</Link>;
       })}</nav>
-      {pathname === "/map-demo" ? <Link className="text-link" href="/login">Log in</Link> : <button className="quiet-button" onClick={async () => {
+      {pathname === "/map-demo" || pathname === "/create-demo" ? <Link className="text-link" href="/login">Log in</Link> : <button className="quiet-button" onClick={async () => {
         try {
           const { error } = await createClient().auth.signOut();
           if (error) throw error;

@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { CampusLocationPicker } from "@/components/campus-location-picker";
 import { EventLocation } from "@/components/event-location";
-import { getCampusMap, type CampusMapPlace } from "@/lib/campus-map";
+import { getCampusMap, type CampusChoice, type CampusLocationId, type CampusMapPlace } from "@/lib/campus-map";
 import { hangouts, symbols } from "@/lib/hangouts";
 
-type EventDraft = { location: string; campusMapPlace?: CampusMapPlace; meetingPoint: string };
+// campusLocationId is stored too so a name-only choice can clear the sample event's original pin.
+type EventDraft = { location: string; campusLocationId?: CampusLocationId; campusMapPlace?: CampusMapPlace; meetingPoint: string };
 
 // Public, fictional sample events only. Normal event pages retain their login checks.
 export default function MapDemo() {
@@ -20,13 +21,16 @@ export default function MapDemo() {
     meetingPoint: draft ? draft.meetingPoint.trim() || "The host hasn’t added an exact meeting point yet." : original.meetingPoint,
   };
 
-  function selectPlace(place: CampusMapPlace) {
-    const samePin = getCampusMap(event.campusLocationId, event.campusMapPlace).location?.markerId === place.markerId;
+  const currentPin = getCampusMap(event.campusLocationId, event.campusMapPlace).location;
+
+  function selectPlace(choice: CampusChoice) {
+    const samePlace = choice.place ? currentPin?.markerId === choice.place.markerId : !currentPin && choice.label === event.location;
     setDrafts((current) => ({ ...current, [selectedId]: {
-      location: place.label,
-      campusMapPlace: place,
+      location: choice.label,
+      campusLocationId: undefined,
+      campusMapPlace: choice.place,
       // Don't keep instructions for the old building when moving the event.
-      meetingPoint: samePin ? draft?.meetingPoint ?? original.meetingPoint : "",
+      meetingPoint: samePlace ? draft?.meetingPoint ?? original.meetingPoint : "",
     } }));
   }
   return (
@@ -44,7 +48,7 @@ export default function MapDemo() {
         ))}
       </div>
       <div className="location-demo-layout">
-        <CampusLocationPicker key={selectedId} event={event} onSelect={selectPlace} />
+        <CampusLocationPicker key={selectedId} value={{ label: event.location, place: currentPin ? { label: currentPin.label, markerId: currentPin.markerId } : undefined }} onChange={selectPlace} />
         <aside className="location-event-preview" aria-label="Demo event preview">
           <p className="eyebrow">YOUR DEMO EVENT</p>
           <article className="card">
@@ -52,7 +56,7 @@ export default function MapDemo() {
             <div className="card-body"><p className="time">{event.time}</p><h2>{event.title}</h2><p className="location"><EventLocation event={event} /></p><p className="description">{event.description}</p><div className="location-preview-meeting"><strong>Meeting point</strong><p>{event.meetingPoint}</p></div></div>
           </article>
           <label className="meeting-instructions-label" htmlFor="meeting-instructions">Meeting instructions (optional)</label>
-          <textarea id="meeting-instructions" maxLength={500} rows={3} placeholder="e.g. Outside the main entrance" value={draft?.meetingPoint ?? original.meetingPoint} onChange={(e) => setDrafts((current) => ({ ...current, [selectedId]: { location: event.location, campusMapPlace: event.campusMapPlace, meetingPoint: e.target.value } }))} />
+          <textarea id="meeting-instructions" maxLength={500} rows={3} placeholder="e.g. Outside the main entrance" value={draft?.meetingPoint ?? original.meetingPoint} onChange={(e) => setDrafts((current) => ({ ...current, [selectedId]: { location: event.location, campusLocationId: event.campusLocationId, campusMapPlace: event.campusMapPlace, meetingPoint: e.target.value } }))} />
           <p className="small-note">Demo only. No event is published. Refresh to reset your changes.</p>
         </aside>
       </div>
