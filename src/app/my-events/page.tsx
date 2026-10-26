@@ -7,6 +7,7 @@ import { useEvents } from "@/components/event-provider";
 export default function MyEvents() {
   const { events, loading, error } = useEvents();
   const myEvents = events.filter((event) => event.isJoined || event.isHost);
+
   return <>
     <section className="page-heading"><p className="eyebrow">YOUR PLANS, ALL TOGETHER</p><h1>My events<span className="gold-dot">.</span></h1><p className="intro">Events you’ve joined and plans you’re hosting.</p><Link className="primary" href="/events/new">Create an event ↗</Link></section>
     {error && <p className="entry-notice" role="alert">{error}</p>}

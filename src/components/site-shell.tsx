@@ -26,13 +26,13 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         const myEventCount = events.filter((event) => event.isJoined || event.isHost).length;
         return <Link key={link.href} href={link.href} className={active ? "nav-link active" : "nav-link"} aria-current={active ? "page" : undefined}>{link.label}{link.href === "/my-events" && !loading && myEventCount > 0 && <span className="nav-count">{myEventCount}</span>}</Link>;
       })}</nav>
-      <button className="quiet-button" onClick={async () => {
+      {pathname === "/map-demo" || pathname === "/create-demo" ? <Link className="text-link" href="/login">Log in</Link> : <button className="quiet-button" onClick={async () => {
         try {
           const { error } = await createClient().auth.signOut();
           if (error) throw error;
           window.location.assign("/login");
         } catch { setLogoutError("Could not log out. Please try again."); }
-      }}>Log out</button>
+      }}>Log out</button>}
     </header>
     {logoutError && <p className="storage-warning" role="alert">{logoutError}</p>}
     {storageError && <p className="storage-warning" role="status">This browser can’t save your demo. Changes will last until you refresh.</p>}
