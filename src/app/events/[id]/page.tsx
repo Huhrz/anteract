@@ -1,12 +1,17 @@
-import { notFound } from "next/navigation";
-import { hangouts } from "@/lib/hangouts";
+"use client";
+
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import { EventDetails } from "@/components/event-details";
+import { useEvents } from "@/components/event-provider";
 
-export function generateStaticParams() { return hangouts.map((event) => ({ id: event.id })); }
+export default function EventPage() {
+  const params = useParams<{ id: string }>();
+  const { events, loading, error } = useEvents();
+  const event = events.find((item) => item.id === params.id);
 
-export default async function EventPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const event = hangouts.find((item) => item.id === id);
-  if (!event) notFound();
+  if (loading) return <p className="loading-state" role="status">Loading event…</p>;
+  if (error) return <section className="empty-state"><h1>Events aren’t available</h1><p role="alert">{error}</p><Link className="primary" href="/events">Back to events</Link></section>;
+  if (!event) return <section className="empty-state"><h1>Event not found</h1><p>It may have been cancelled or removed.</p><Link className="primary" href="/events">Browse events</Link></section>;
   return <EventDetails event={event} />;
 }
