@@ -80,11 +80,11 @@ export default function Login() {
     <section className="welcome-story story-social" aria-labelledby="page-title">
       <Link className="welcome-brand" href="/" aria-label="Anteract home"><span><img src="/anteater.svg" alt="" width="36" height="36" /></span>anteract<span className="brand-period">.</span></Link>
       <div className="social-stage">
-        <div className="social-collage" aria-label="New friends, coffee plans, and adventures">
-          <div className="social-coast"><img src="/coast.jpg" alt="An afternoon on the California coast" /><span aria-hidden="true">⌖</span></div>
-          <div className="social-friends"><img src="/campus-friends.jpg" alt="Students laughing together in a library" /><div className="social-progress" aria-hidden="true"><i /><i /><i /></div><div className="social-story-caption">Better<br />together.</div><div className="social-reply" aria-hidden="true"><span /><i /><i /></div></div>
-          <div className="social-coffee"><span className="social-coffee-icon" aria-hidden="true">☕</span><img src="/coffee.jpg" alt="Coffee for a break between classes" /><span className="social-card-line" /><span className="social-card-line short" /></div>
-          <div className="social-portrait"><img src="/student-portrait.jpg" alt="A smiling student" /></div>
+        <div className="social-collage" aria-label="UCI friends, Aldrich Park, and campus life">
+          <div className="social-coast"><img src="/uci-aldrich-park.jpg" alt="Students walking through Aldrich Park at UCI" /><span aria-hidden="true">⌖</span></div>
+          <div className="social-friends"><img src="/uci-campus-students.jpg" alt="UCI students smiling together in blue and gold campus gear" /><div className="social-progress" aria-hidden="true"><i /><i /><i /></div><div className="social-story-caption">Better<br />together.</div><div className="social-reply" aria-hidden="true"><span /><i /><i /></div></div>
+          <div className="social-coffee"><span className="social-coffee-icon" aria-hidden="true">🌳</span><img src="/uci-campus.jpg" alt="Students gathering along a tree-lined UCI campus walkway" /><span className="social-card-line" /><span className="social-card-line short" /></div>
+          <div className="social-portrait"><img src="/uci-student.jpg" alt="A UCI student smiling while working on her laptop" /></div>
           <span className="social-smile" aria-hidden="true">☀</span>
           <span className="social-heart" aria-hidden="true">♥</span>
           <span className="social-plan">Coffee? <span aria-hidden="true">↗</span></span>
@@ -93,7 +93,7 @@ export default function Login() {
       </div>
     </section>
     <section className="welcome-entry" aria-labelledby="entry-title">
-      <span className="uci-badge"><span>✦</span> EXCLUSIVELY UCI</span>
+      <span className="uci-badge"><img src="/uci_logo.png" alt="UCI anteater mascot" width="76" height="41" /> EXCLUSIVELY UCI</span>
       <div className="entry-content">
         <p className="entry-kicker">GOOD TO SEE YOU HERE</p>
         <h2 id="entry-title">{mode === "signup" ? "Your people are here." : mode === "reset" ? "Let’s get you back in." : "Hello, Anteater."}<span> {mode === "login" ? "✳" : ""}</span></h2>
