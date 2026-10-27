@@ -486,7 +486,7 @@ a.person-row:hover { border-color: #8eacbf; }
 .story-footnote span { color: #c29c30; margin-left: 15px; }
 .welcome-entry { padding: 45px 11% 30px; display: flex; flex-direction: column; min-width: 0; }
 .uci-badge { align-self: flex-end; font-size: 9px; font-weight: 700; letter-spacing: 1.6px; color: #65766a; display: flex; align-items: center; gap: 7px; }
-.uci-badge > span { color: #b89126; font-size: 17px; }
+.uci-badge > img { display: block; width: 76px; height: auto; flex-shrink: 0; }
 .entry-content { margin: auto 0; padding: 65px 0; width: 100%; }
 .entry-kicker { font-size: 9px; letter-spacing: 2px; color: #8a9399; font-weight: 700; margin: 0 0 16px; }
 .entry-content h2 { font-size: clamp(29px, 2.8vw, 42px); line-height: 1.2; letter-spacing: -1.5px; }
