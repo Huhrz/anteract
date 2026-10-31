@@ -38,4 +38,4 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 
-export const config = { matcher: ["/", "/login", "/profile", "/events/:path*", "/my-events/:path*", "/profiles/:path*", "/chat/:path*", "/auth/:path*"] };
+export const config = { matcher: ["/", "/login", "/profile", "/events/:path*", "/my-events/:path*", "/friends/:path*", "/profiles/:path*", "/chat/:path*", "/auth/:path*"] };

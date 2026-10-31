@@ -610,3 +610,30 @@ a.person-row:hover { border-color: #8eacbf; }
 .password-reset { max-width: 460px; margin: 10svh auto; padding: 24px; }
 .password-reset h1 { font-size: 36px; }
 .password-reset .entry-notice:empty { display: none; }
+
+.friends-page { max-width: 800px; margin: auto; }
+.friend-section { margin: 34px 0 42px; }
+.friend-section h2 { font-size: 22px; }
+.friend-search { margin: 20px 0; }
+.friend-search label { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 600; }
+.friend-search > div { display: flex; gap: 10px; }
+.friend-search input { flex: 1; min-width: 0; padding: 13px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); background: white; font: inherit; font-size: 13px; }
+.friend-list { display: grid; gap: 10px; }
+.friend-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: white; }
+.friend-identity { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.friend-avatar { flex: 0 0 46px; width: 46px; height: 46px; background: #e9f0f5; color: var(--navy); font-size: 13px; }
+.friend-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.friend-identity > span:last-child { min-width: 0; }
+.friend-identity strong { display: block; font-size: 13px; }
+.friend-identity small { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; }
+.friend-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.friend-actions .primary, .friend-card > .primary { padding: 10px 13px; font-size: 11px; }
+.profile-heading .friend-actions .primary { margin-top: 0; }
+.friend-state { color: #38664c; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.friend-error { flex-basis: 100%; color: #9e3038; font-size: 11px; }
+@media (max-width: 600px) {
+  .friend-card { align-items: flex-start; flex-direction: column; }
+  .friend-card > .primary, .friend-actions { align-self: stretch; }
+  .friend-actions .primary, .friend-actions .quiet-button { flex: 1; }
+  .friend-search > div { align-items: stretch; }
+}
