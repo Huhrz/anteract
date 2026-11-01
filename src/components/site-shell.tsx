@@ -12,7 +12,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const [logoutError, setLogoutError] = useState("");
   const { events, loading } = useEvents();
   const { storageError } = useDemo();
-  const links = [{ href: "/", label: "Home" }, { href: "/events", label: "Browse Events" }, { href: "/my-events", label: "My Events" }, { href: "/profile", label: "My Profile" }];
+  const links = [{ href: "/", label: "Home" }, { href: "/events", label: "Browse Events" }, { href: "/my-events", label: "My Events" }, { href: "/friends", label: "Friends" }, { href: "/profile", label: "My Profile" }];
   if (pathname === "/login" || pathname.startsWith("/auth/")) return <>
     <a className="skip-link" href="#main-content">Skip to content</a>
     <main id="main-content" className="welcome-main">{children}</main>
