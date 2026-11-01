@@ -5,6 +5,7 @@ import { useState } from "react";
 import { symbols } from "@/lib/hangouts";
 import { useEvents, type SharedEvent } from "./event-provider";
 import { CampusMap } from "./campus-map";
+import { EventTags } from "./event-tags";
 import { EventLocation } from "./event-location";
 
 export function EventDetails({ event }: { event: SharedEvent }) {
@@ -27,6 +28,7 @@ export function EventDetails({ event }: { event: SharedEvent }) {
     <div className={`event-banner ${event.category.toLowerCase()}`}><span className="category-label">{event.category} hangout</span><span className="banner-symbol" aria-hidden="true">{symbol}</span><p>One plan. A few new faces.</p></div>
     <div className="detail-grid">
       <section className="detail-content"><p className="eyebrow">LET’S MAKE A PLAN</p><h1>{event.title}</h1><Link className="host-line large" href={`/profiles/${event.hostId}`}><span className="avatar blue">{event.hostName.slice(0, 1).toUpperCase()}</span><span>Hosted by <strong>{event.hostName}</strong><small>View profile →</small></span></Link>
+        <EventTags tags={event.tags} />
         <h2>About this hangout</h2><p className="body-copy">{event.description}</p>
         <h2>Where to meet</h2><p className="body-copy">{event.meetingPoint || event.location}</p>
         <CampusMap event={event} />

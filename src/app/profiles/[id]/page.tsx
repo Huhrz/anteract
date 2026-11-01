@@ -1,12 +1,17 @@
+import { guestModeEnabled } from "@/lib/guest-mode";
+import { ProfileSocialLinks } from "@/components/profile-social-links";
+import { GuestProfile } from "@/components/guest-profile";
 import { AccountSafety } from "@/components/account-safety";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { hangouts, people, symbols } from "@/lib/hangouts";
 import { createClient } from "@/lib/supabase/server";
 import { profileInitials, profilePhotoBucket } from "@/lib/profile";
+import { FriendRequestButton } from "@/components/friend-request-button";
 
 export default async function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (guestModeEnabled) return <GuestProfile id={id} />;
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
     const supabase = await createClient();
     const [{ data: { user }, error: authError }, { data: profile, error: profileError }] = await Promise.all([
@@ -24,12 +29,13 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
     return <div className="profile-page"><Link className="back-link" href="/events">← Browse events</Link>
       <section className="profile-card"><div className="profile-cover blue"><span aria-hidden="true">✦</span><span>GOOD COMPANY STARTS HERE</span></div><div className="profile-body">
         <div className="profile-heading"><span className="avatar profile-avatar blue">{photoUrl ? <img src={photoUrl} alt="" /> : profileInitials(profile.display_name)}</span>
-          {user?.id === profile.id && <Link className="secondary" href="/profile">Edit profile</Link>}
+          {user?.id === profile.id ? <Link className="secondary" href="/profile">Edit profile</Link> : <FriendRequestButton profileId={profile.id} name={profile.display_name} />}
         </div>
         <p className="eyebrow">UCI STUDENT</p><h1>{profile.display_name}</h1>
         {(profile.major || profile.class_year) && <p className="profile-meta">{[profile.major, profile.class_year].filter(Boolean).join(" · ")}</p>}
         <h2>Things we could have in common</h2>
         {profile.interests.length ? <div className="interest-tags">{profile.interests.map((interest: string) => <span key={interest}>{interest}</span>)}</div> : <p className="body-copy">No interests added yet.</p>}
+        <ProfileSocialLinks links={profile.social_links} />
       </div></section>
     </div>;
   }

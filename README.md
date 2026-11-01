@@ -1,6 +1,6 @@
 # Anteract
 
-A Next.js + React frontend prototype for finding UCI hangouts.
+A Next.js + React app for discovering UCI hangouts, making plans, and connecting with other students.
 
 ## Run locally
 
@@ -30,14 +30,16 @@ npx --yes pnpm@11.25.0 build
 | Create event | `/events/new` | Create a UCI event with a date, capacity, and meeting details. |
 | Event details | `/events/<id>` | See event information, join/leave, and cancel an event you host. |
 | My Events | `/my-events` | View events you joined and events you host. |
+| Friends | `/friends` | Search students, send requests, and accept or decline invitations. |
+| My Profile | `/profile` | Edit your profile, photo, interests, and social media links. |
 | Person's profile | `/profiles/maya` | View their interests and press Chat. All profiles are fictional demo data. |
 | Chat | `/chat/maya` | Type and send a local demo message. Switch contacts to view separate conversations. |
 
-Events and memberships are stored in Supabase and shared across signed-in UCI accounts. Database policies restrict event creation and membership to the authenticated UCI user; unique membership and event capacity are enforced in the database. Cancelling an event removes its memberships. Chat and report/block controls remain local demo behavior. Existing sample-profile content and time labels are not database records.
+In backend mode, events and memberships are stored in Supabase and shared across signed-in UCI accounts. Database policies restrict event creation and membership to the authenticated UCI user; unique membership and event capacity are enforced in the database. Cancelling an event removes its memberships. Chat and report/block controls remain local demo behavior. Existing sample-profile content and time labels are not database records.
 
 ## Campus map demo
 
-Open `/map-demo` to choose a location for one of three fictional sample events. No Supabase configuration or login is needed. There is no full event-creation form yet; this page demonstrates its location field. Existing event pages keep their authentication requirements.
+Open `/map-demo` to choose a location for one of three fictional sample events. No Supabase configuration or login is needed. This page demonstrates the location field. The reusable location picker is also available in `/create-demo`; the backend event form currently uses a location text field. Backend event pages require authentication unless the isolated guest demo is enabled.
 
 1. Enter a campus location name and press **Search UCI map**. The embedded official map displays real search results.
 2. For a quick match, press **Preview pin**, check the map, then **Use this location**. Quick matches are a small verified demo catalog (Science Library, Langson Library, ARC, Student Center, Aldrich Park, and Watson Bridge), not the live UCI index.
@@ -82,3 +84,25 @@ Profiles and chats offer Report account and Block account controls. Reports requ
 Blocks and reports persist in this browser alongside the agenda. These are demo controls: reports are not delivered to moderators and blocks do not affect another device or person. If storage fails, changes last only for this session.
 
 For production, authenticate the acting account on the server, store reports in a private moderation queue with access controls, and enforce blocks on both message delivery and conversation access in both directions. Never rely on browser state for enforcement or disclose the reporter to the reported account.
+
+## Event discovery
+
+Open `/events-demo` without signing in to try filtering four fictional events. This page does not publish events or join anyone to real plans. `/create-demo` now previews interest tags with the same validation as the real event form.
+
+The real `/events` browser supports category, keyword, multiple interest tags (all must match), Today / Next 7 days / Upcoming, and open spots. Browse shows only future starts and sorts by start time. Tags on cards and event details link to a filtered browser. New events accept up to five tags of 24 characters; spaces become hyphens and duplicates are removed. Old events with no tags still work.
+
+Apply `supabase/migrations/202611010001_event_tags.sql` before deploying the updated real creation form. Run `node --test tests/*.test.mjs` for the authentication, map, discovery, guest-mode, and social-link rules. The guest preview does not apply migrations or write to Supabase.
+
+## Login-free guest demo
+
+For a local demo with no Supabase configuration, copy `guest-demo.env` to `.env.local`, then build and start the app. Open `/` to use the normal home, discovery, event creation, agenda, friends, profiles and local chat. Login URLs redirect to the home page while guest mode is enabled.
+
+Guest events, memberships, profile and friend requests stay in this browser under `anteract-guest-v1`; chat retains its separate local-demo storage. The banner identifies guest mode and offers Reset sample data. Sample invitations do not contact other people. If browser storage is unavailable, a notice explains that changes last until refresh.
+
+`NEXT_PUBLIC_GUEST_MODE` defaults to false. Both Supabase variables must be absent for guest mode to activate. Setting either Supabase variable disables the guest bypass, so a configured backend continues to require UCI authentication. Do not copy the placeholder Supabase values from `.env.example` into a guest-only setup. This mode never supplies a real user session or writes to Supabase.
+
+## Profile social media
+
+The profile editor supports up to five optional social media links, with platform selectors, Add and Remove controls. Missing schemes normalize to HTTPS. Links appear on the student's profile and open in a new tab. Empty rows are ignored; duplicate links, non-HTTPS protocols and URLs containing credentials are rejected. Supported labels are Instagram, LinkedIn, Discord, X, TikTok, GitHub and Website.
+
+Guest-mode links persist with the rest of the browser-local profile. Existing guest saves without social links remain valid. For real Supabase profiles, review and apply `supabase/migrations/202611010002_profile_social_links.sql` before deploying the updated profile form. No remote migration is run by this source package.

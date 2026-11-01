@@ -7,11 +7,12 @@ The app uses Supabase Auth through supabase-js and SSR cookies. No ORM or databa
 3. Apply `supabase/migrations/202610230001_uci_auth_hook.sql` in the Supabase SQL editor (or via your Supabase migration workflow). In Authentication > Hooks, enable **Before User Created**, choose the Postgres function `public.restrict_uci_signup`. Running the SQL alone does not enable the hook.
 4. Apply `supabase/migrations/202610240001_profiles.sql` to create the profile table and private profile-photo bucket. The `/profile` page lets a signed-in student edit their display name, major, class year, interests, and photo. `/profiles/<user-id>` displays the profile to signed-in UCI students. Photos must be JPG, PNG, or WebP and no larger than 5 MB.
 5. Apply `supabase/migrations/202610240002_events.sql` after the profiles migration in the same Supabase project. It creates shared events and memberships with RLS, unique joins, and database-enforced capacity. The app supports creating, browsing, joining, leaving, and cancelling events. Run each migration once; do not rerun a file that has already partially or fully succeeded.
-6. In Authentication > URL Configuration set Site URL to your deployed app URL (use `http://localhost:3000` during local development). Allow these redirect URLs for each actual origin:
+6. Apply `supabase/migrations/202610310001_friend_requests.sql` after the profiles and events migrations. It creates the friend-request table and access policies. Users can find incoming invitations at the top of the **Friends** page (`/friends`). If the app reports that `public.friend_requests` is missing from the schema cache after applying the migration, confirm it was run in the same Supabase project configured by `.env.local`; then reload the schema cache from Supabase Dashboard > Settings > API, or wait briefly and retry.
+7. In Authentication > URL Configuration set Site URL to your deployed app URL (use `http://localhost:3000` during local development). Allow these redirect URLs for each actual origin:
    - `http://localhost:3000/auth/callback`
    - `http://localhost:3000/auth/callback?next=/auth/reset-password`
    - The equivalent two URLs on your production origin.
-7. For confirmation links that also work when opened in a different browser, edit the email templates to use these links:
+8. For confirmation links that also work when opened in a different browser, edit the email templates to use these links:
 
    Confirm signup:
    `<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup">Confirm your email</a>`
@@ -20,7 +21,7 @@ The app uses Supabase Auth through supabase-js and SSR cookies. No ORM or databa
    `<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery">Reset your password</a>`
 
    The callback route also supports the default PKCE email flow, which requires the link to open in the browser that requested it. Set Site URL to the environment you are testing when using the custom templates.
-8. Configure custom SMTP before inviting real students. Supabase's default mail service restricts recipients and sending volume; a real UCI address may not receive mail until SMTP is configured.
+9. Configure custom SMTP before inviting real students. Supabase's default mail service restricts recipients and sending volume; a real UCI address may not receive mail until SMTP is configured.
 
 ## Validate before launch
 
@@ -44,3 +45,13 @@ The signup hook restricts account creation. Protected app routes also check the 
 Never expose a secret/service-role key in a NEXT_PUBLIC variable. No administrative key is required by this implementation.
 
 The app home is `/`; authentication lives at `/login`. Successful login and signup confirmation lead home. Signed-out visitors to app pages go to `/login`.
+
+## Interest tags and discovery (review draft)
+
+Apply `migrations/202611010001_event_tags.sql` after the existing events migration. It adds `events.tags` as a non-null text array, defaulting to an empty list for existing events. The constraint accepts at most five distinct lowercase tags, each up to 24 characters and containing letters a-z, digits, and single hyphens. Event creation normalizes input using the same rules. Apply this migration before deploying the new event form, which writes the tags column.
+
+Tags describe interests and do not enforce friends-only or club-only access. Existing event and membership policies continue to apply. The new UI filters upcoming events by category, text (including tags), all selected tags, local calendar dates, and open capacity. Production writes and database constraints require verification against a configured Supabase test project; this local review does not apply migrations remotely.
+
+## Profile social links
+
+Before deploying the updated profile editor to a real backend, review and apply `migrations/202611010002_profile_social_links.sql` after the profiles migration. It adds a `social_links` JSONB array with an empty default, a five-link maximum, platform labels and HTTPS URL checks. Existing profile read/write policies continue to control access. The client normalizes and validates the same platform/link pairs before saving. Guest-mode changes stay in local browser storage and do not require this migration.

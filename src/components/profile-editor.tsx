@@ -2,6 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
+import { guestModeEnabled } from "@/lib/guest-mode";
+import { guestUserId } from "@/lib/guest-state";
+import { useGuest } from "./guest-provider";
+import { SocialLinksEditor } from "./social-links-editor";
+import { parseSocialLinks, type SocialLink } from "@/lib/social-links";
 import { createClient } from "@/lib/supabase/client";
 import { parseInterests, profilePhotoBucket, profilePhotoMaxBytes, type Profile } from "@/lib/profile";
 
@@ -16,7 +21,9 @@ function errorMessage(error: unknown, fallback: string) {
 }
 
 export default function ProfileEditor() {
+  const guest = useGuest();
   const [userId, setUserId] = useState("");
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoUrl, setPhotoUrl] = useState("");
@@ -26,6 +33,14 @@ export default function ProfileEditor() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (guestModeEnabled) {
+      if (!guest.ready) return;
+      setUserId(guestUserId); setProfile(guest.state.profile);
+      const parsed = parseSocialLinks(guest.state.profile.social_links);
+      setSocialLinks(parsed.ok ? parsed.links : []);
+      setPhotoUrl(guest.state.profile.photoUrl); setLoading(false);
+      return;
+    }
     let active = true;
     void (async () => {
       try {
@@ -44,6 +59,8 @@ export default function ProfileEditor() {
         if (active) {
           setUserId(user.id);
           setProfile(data);
+          const parsed = parseSocialLinks(data?.social_links);
+          setSocialLinks(parsed.ok ? parsed.links : []);
           setPhotoUrl(signedPhoto);
         }
       } catch (loadError) {
@@ -53,7 +70,7 @@ export default function ProfileEditor() {
       }
     })();
     return () => { active = false; };
-  }, []);
+  }, [guest.ready, guest.state.profile]);
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -68,11 +85,26 @@ export default function ProfileEditor() {
       return;
     }
 
+    const parsedSocials = parseSocialLinks(socialLinks);
+    if (!parsedSocials.ok) {
+      setError(parsedSocials.error); setNotice("");
+      if (parsedSocials.index !== undefined) document.getElementById(`social-url-${parsedSocials.index}`)?.focus();
+      return;
+    }
     setSaving(true);
     setError("");
     setNotice("");
     let uploadedPath: string | null = profile?.avatar_path ?? null;
     try {
+      if (guestModeEnabled) {
+        let savedPhoto = guest.state.profile.photoUrl;
+        if (photo) savedPhoto = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(new Error("Could not read the photo.")); reader.readAsDataURL(photo);
+        });
+        guest.act({ type: "profile", profile: { id: guestUserId, display_name: displayName, major, class_year: classYear, interests, social_links: parsedSocials.links, avatar_path: null, photoUrl: savedPhoto } });
+        setPhoto(null); setNotice("Your guest profile is saved in this browser.");
+        return;
+      }
       const supabase = createClient();
       if (photo) {
         const extension = photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
@@ -81,7 +113,7 @@ export default function ProfileEditor() {
         if (uploadError) throw uploadError;
       }
 
-      const updated = { id: userId, display_name: displayName, major, class_year: classYear, interests, avatar_path: uploadedPath };
+      const updated = { id: userId, display_name: displayName, major, class_year: classYear, interests, social_links: parsedSocials.links, avatar_path: uploadedPath };
       const { data, error: saveError } = await supabase.from("profiles").upsert(updated).select("*").single();
       if (saveError) throw saveError;
 
@@ -92,6 +124,7 @@ export default function ProfileEditor() {
         signedPhoto = signed.signedUrl;
       }
       setProfile(data);
+      setSocialLinks(parsedSocials.links);
       setPhotoUrl(signedPhoto);
       setPhoto(null);
       setNotice("Your profile is saved.");
@@ -140,6 +173,7 @@ export default function ProfileEditor() {
       <label htmlFor="interests">Interests</label>
       <input id="interests" name="interests" defaultValue={profile?.interests.join(", ") ?? ""} placeholder="Coffee, hiking, study sessions" />
       <p className="small-note">Separate interests with commas. Up to 10, with 30 characters each.</p>
+      <SocialLinksEditor value={socialLinks} onChange={(links) => { setSocialLinks(links); setError(""); setNotice(""); }} disabled={saving} />
       {error && <p className="entry-notice" role="alert">{error}</p>}
       {notice && <p className="entry-notice" role="status">{notice}</p>}
       <button className="primary" type="submit" disabled={saving}>{saving ? "Saving…" : "Save profile"}</button>

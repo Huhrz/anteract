@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { guestModeEnabled } from "@/lib/guest-mode";
+import { emptyState } from "@/lib/demo-state";
+import { useGuest } from "./guest-provider";
 import { createClient } from "@/lib/supabase/client";
 import { usePathname } from "next/navigation";
 import { useEvents } from "./event-provider";
@@ -9,10 +12,11 @@ import { useDemo } from "./demo-provider";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const guest = useGuest();
   const [logoutError, setLogoutError] = useState("");
   const { events, loading } = useEvents();
-  const { storageError } = useDemo();
-  const links = [{ href: "/", label: "Home" }, { href: "/events", label: "Browse Events" }, { href: "/my-events", label: "My Events" }, { href: "/profile", label: "My Profile" }];
+  const { storageError, dispatch } = useDemo();
+  const links = [{ href: "/", label: "Home" }, { href: "/events", label: "Browse Events" }, { href: "/my-events", label: "My Events" }, { href: "/friends", label: "Friends" }, { href: "/profile", label: "My Profile" }];
   if (pathname === "/login" || pathname.startsWith("/auth/")) return <>
     <a className="skip-link" href="#main-content">Skip to content</a>
     <main id="main-content" className="welcome-main">{children}</main>
@@ -26,7 +30,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         const myEventCount = events.filter((event) => event.isJoined || event.isHost).length;
         return <Link key={link.href} href={link.href} className={active ? "nav-link active" : "nav-link"} aria-current={active ? "page" : undefined}>{link.label}{link.href === "/my-events" && !loading && myEventCount > 0 && <span className="nav-count">{myEventCount}</span>}</Link>;
       })}</nav>
-      {pathname === "/map-demo" || pathname === "/create-demo" ? <Link className="text-link" href="/login">Log in</Link> : <button className="quiet-button" onClick={async () => {
+      {guestModeEnabled ? <span className="guest-badge">Guest mode</span> : pathname === "/map-demo" || pathname === "/create-demo" || pathname === "/events-demo" ? <Link className="text-link" href="/login">Log in</Link> : <button className="quiet-button" onClick={async () => {
         try {
           const { error } = await createClient().auth.signOut();
           if (error) throw error;
@@ -34,6 +38,8 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         } catch { setLogoutError("Could not log out. Please try again."); }
       }}>Log out</button>}
     </header>
+    {guestModeEnabled && <div className="guest-banner"><span><strong>Guest demo</strong> · Try events, friends and profiles. Changes stay in this browser.</span><button type="button" onClick={() => { if (window.confirm("Reset your guest events, profile, friends and local messages?")) { guest.reset(); dispatch({ type: "hydrate", state: emptyState }); } }}>Reset sample data</button></div>}
+    {guestModeEnabled && guest.storageError && <p className="storage-warning" role="status">This browser could not save guest data. Your changes will last until you refresh.</p>}
     {logoutError && <p className="storage-warning" role="alert">{logoutError}</p>}
     {storageError && <p className="storage-warning" role="status">This browser can’t save your demo. Changes will last until you refresh.</p>}
     <main id="main-content">{children}</main>

@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import "./create-demo.css";
 import { CampusLocationPicker } from "@/components/campus-location-picker";
+import { EventTagInput } from "@/components/event-tag-input";
+import { EventTags } from "@/components/event-tags";
+import { parseEventTags } from "@/lib/event-tags";
 import { EventLocation } from "@/components/event-location";
 import type { CampusChoice } from "@/lib/campus-map";
 import { symbols, type Hangout } from "@/lib/hangouts";
@@ -16,6 +19,8 @@ const formatTime = (iso: string) => new Intl.DateTimeFormat("en-US", { weekday: 
 // Public demo: nothing is saved. To make it real, send `result.value` (see handleSubmit)
 // to the server instead of showing it. Rules live in src/lib/new-event.ts.
 export default function CreateEventDemo() {
+  const [tags, setTags] = useState("");
+  const [tagError, setTagError] = useState("");
   const [form, setForm] = useState(emptyForm);
   const [location, setLocation] = useState<CampusChoice | null>(null);
   const [errors, setErrors] = useState<NewEventErrors>({});
@@ -34,16 +39,21 @@ export default function CreateEventDemo() {
       if (first) document.getElementById(fieldIds[first])?.focus();
       return;
     }
+    const parsedTags = parseEventTags(tags);
+    if (!parsedTags.ok) { setTagError(parsedTags.error); document.getElementById("event-tags")?.focus(); return; }
+    setTagError("");
     setErrors({});
-    setCreated(result.value); // Backend integration point: send result.value to the server here.
+    setCreated({ ...result.value, tags: parsedTags.tags }); // Backend integration point: send result.value to the server here.
   }
 
-  function reset() { setForm(emptyForm); setLocation(null); setErrors({}); setCreated(null); }
+  function reset() { setForm(emptyForm); setTags(""); setTagError(""); setLocation(null); setErrors({}); setCreated(null); }
 
   const shown = created ?? { ...form, location: location?.label ?? "", campusMarkerId: location?.place?.markerId };
   const category = (eventCategoryNames as readonly string[]).includes(shown.category) ? shown.category as NewEventInput["category"] : "Study";
   const startsAt = created ? created.startsAt : shown.startsAt && Number.isFinite(new Date(shown.startsAt).getTime()) ? shown.startsAt : "";
+  const parsedPreviewTags = parseEventTags(tags);
   const preview: Hangout = {
+    tags: parsedPreviewTags.ok ? parsedPreviewTags.tags : [],
     id: "preview", title: shown.title.trim() || "Your event title", category, location: location?.label ?? "", campusMapPlace: location?.place,
     time: startsAt ? formatTime(startsAt) : "Pick a date and time", description: shown.description.trim() || "What will you do together?",
     participants: 1, capacity: Number(shown.capacity) || 0, hostId: "you", attendeeIds: [], meetingPoint: shown.meetingPoint.trim(), bring: shown.bring.trim(),
@@ -96,6 +106,10 @@ export default function CreateEventDemo() {
               {error("meetingPoint")}
             </div>
             <div className="cd-field">
+              <EventTagInput value={tags} onChange={(value) => { setTags(value); setTagError(""); }} />
+              {tagError && <p className="cd-error" role="alert">{tagError}</p>}
+            </div>
+            <div className="cd-field">
               <label htmlFor="cd-description">What will you do?</label>
               <textarea id="cd-description" rows={4} value={form.description} maxLength={eventLimits.description.max} placeholder="Bring your notes. We’ll keep each other focused and take a coffee break." onChange={(e) => set("description", e.target.value)} {...invalid("description")} />
               {error("description")}
@@ -123,7 +137,7 @@ export default function CreateEventDemo() {
               <p className="time">{preview.time}</p>
               <h2>{preview.title}</h2>
               <p className="location">{location ? <EventLocation event={preview} /> : <span className="cd-placeholder">⌖ Choose a location</span>}</p>
-              <p className="description">{preview.description}</p>
+              <p className="description">{preview.description}</p><EventTags tags={preview.tags} browsePath="/events-demo" />
               {preview.meetingPoint && <div className="location-preview-meeting"><strong>Meeting point</strong><p>{preview.meetingPoint}</p></div>}
               <p className="cd-going">1/{preview.capacity || "—"} going · You’re the host</p>
             </div>
