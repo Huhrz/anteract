@@ -45,3 +45,13 @@ The signup hook restricts account creation. Protected app routes also check the 
 Never expose a secret/service-role key in a NEXT_PUBLIC variable. No administrative key is required by this implementation.
 
 The app home is `/`; authentication lives at `/login`. Successful login and signup confirmation lead home. Signed-out visitors to app pages go to `/login`.
+
+## Interest tags and discovery (review draft)
+
+Apply `migrations/202611010001_event_tags.sql` after the existing events migration. It adds `events.tags` as a non-null text array, defaulting to an empty list for existing events. The constraint accepts at most five distinct lowercase tags, each up to 24 characters and containing letters a-z, digits, and single hyphens. Event creation normalizes input using the same rules. Apply this migration before deploying the new event form, which writes the tags column.
+
+Tags describe interests and do not enforce friends-only or club-only access. Existing event and membership policies continue to apply. The new UI filters upcoming events by category, text (including tags), all selected tags, local calendar dates, and open capacity. Production writes and database constraints require verification against a configured Supabase test project; this local review does not apply migrations remotely.
+
+## Profile social links
+
+Before deploying the updated profile editor to a real backend, review and apply `migrations/202611010002_profile_social_links.sql` after the profiles migration. It adds a `social_links` JSONB array with an empty default, a five-link maximum, platform labels and HTTPS URL checks. Existing profile read/write policies continue to control access. The client normalizes and validates the same platform/link pairs before saving. Guest-mode changes stay in local browser storage and do not require this migration.

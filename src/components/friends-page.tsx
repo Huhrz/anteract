@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { guestModeEnabled } from "@/lib/guest-mode";
+import { guestPeople } from "@/lib/guest-people";
+import { guestUserId } from "@/lib/guest-state";
+import { useGuest } from "./guest-provider";
 import { createClient } from "@/lib/supabase/client";
 import { profileInitials } from "@/lib/profile";
 
@@ -15,6 +19,7 @@ function getErrorMessage(error: unknown) {
 }
 
 export default function FriendsPage() {
+  const guest = useGuest();
   const [userId, setUserId] = useState("");
   const [requests, setRequests] = useState<FriendRequest[]>([]);
   const [profiles, setProfiles] = useState<Record<string, ProfileWithPhoto>>({});
@@ -59,11 +64,17 @@ export default function FriendsPage() {
   }, []);
 
   useEffect(() => {
+    if (guestModeEnabled) {
+      if (!guest.ready) return;
+      setUserId(guestUserId); setRequests(guest.state.requests);
+      setProfiles(Object.fromEntries(guestPeople.map((profile) => [profile.id, profile])));
+      setLoading(false); return;
+    }
     let active = true;
     void refresh().catch((loadError: unknown) => { if (active) setError(getErrorMessage(loadError)); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [refresh]);
+  }, [refresh, guest.ready, guest.state.requests]);
 
   async function search(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -71,6 +82,10 @@ export default function FriendsPage() {
     setNotice("");
     setResults([]);
     try {
+      if (guestModeEnabled) {
+        const term = query.trim().toLowerCase();
+        setResults(term ? guestPeople.filter((profile) => profile.display_name.toLowerCase().includes(term)) : []); return;
+      }
       const supabase = createClient();
       const term = query.trim();
       if (!term) { setResults([]); return; }
@@ -103,6 +118,7 @@ export default function FriendsPage() {
     setError("");
     setNotice("");
     try {
+      if (guestModeEnabled) { guest.act({ type: "respond", requestId: request.id, accept }); setNotice("Invitation updated in this browser demo."); return; }
       const { data, error: updateError } = await createClient().from("friend_requests")
         .update({ status: accept ? "accepted" : "rejected" }).eq("id", request.id).select("id").maybeSingle();
       if (updateError) throw updateError;
@@ -121,6 +137,7 @@ export default function FriendsPage() {
     setError("");
     setNotice("");
     try {
+      if (guestModeEnabled) { guest.act({ type: "invite", request: { id: crypto.randomUUID(), sender_id: guestUserId, recipient_id: profile.id, status: "pending", created_at: new Date().toISOString() } }); setNotice("Friend request saved in this browser demo."); return; }
       const { error: insertError } = await createClient().from("friend_requests")
         .insert({ sender_id: userId, recipient_id: profile.id });
       if (insertError) throw insertError;

@@ -1,3 +1,5 @@
+import type { SocialLink } from "./social-links";
+
 export type Profile = {
   id: string;
   display_name: string;
@@ -5,6 +7,7 @@ export type Profile = {
   class_year: string;
   interests: string[];
   avatar_path: string | null;
+  social_links?: SocialLink[];
 };
 
 export const profilePhotoBucket = "profile-photos";

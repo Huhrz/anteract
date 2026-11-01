@@ -11,6 +11,8 @@ export type Hangout = {
   campusLocationId?: CampusLocationId;
   campusMapPlace?: CampusMapPlace;
   time: string;
+  startsAt?: string;
+  tags?: string[];
   description: string;
   participants: number;
   capacity: number;

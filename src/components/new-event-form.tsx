@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { EventTagInput } from "./event-tag-input";
+import { parseEventTags } from "@/lib/event-tags";
 import { categories } from "@/lib/hangouts";
 import { useEvents } from "@/components/event-provider";
 
@@ -11,6 +13,7 @@ const eventCategories = categories.filter((category): category is Exclude<typeof
 export default function NewEventForm() {
   const router = useRouter();
   const { createEvent } = useEvents();
+  const [tags, setTags] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -20,6 +23,12 @@ export default function NewEventForm() {
     const startsAt = new Date(String(form.get("starts_at") ?? ""));
     if (!Number.isFinite(startsAt.getTime()) || startsAt.getTime() <= Date.now()) {
       setError("Choose a date and time in the future.");
+      return;
+    }
+    const parsedTags = parseEventTags(tags);
+    if (!parsedTags.ok) {
+      setError(parsedTags.error);
+      document.getElementById("event-tags")?.focus();
       return;
     }
     setSaving(true);
@@ -34,6 +43,7 @@ export default function NewEventForm() {
         meetingPoint: String(form.get("meeting_point") ?? "").trim(),
         bring: String(form.get("bring") ?? "").trim(),
         capacity: Number(form.get("capacity")),
+        tags: parsedTags.tags,
       });
       router.push(`/events/${id}`);
     } catch (createError) {
@@ -51,6 +61,7 @@ export default function NewEventForm() {
       <input id="event-title" name="title" required minLength={3} maxLength={100} placeholder="A little study company" />
       <label htmlFor="event-category">Category</label>
       <select id="event-category" name="category" required defaultValue="Study">{eventCategories.map((category) => <option key={category}>{category}</option>)}</select>
+      <EventTagInput value={tags} onChange={setTags} disabled={saving} />
       <label htmlFor="event-location">Location</label>
       <input id="event-location" name="location" required minLength={2} maxLength={120} placeholder="Science Library" />
       <label htmlFor="event-time">Date and time</label>

@@ -1,3 +1,6 @@
+import { guestModeEnabled } from "@/lib/guest-mode";
+import { ProfileSocialLinks } from "@/components/profile-social-links";
+import { GuestProfile } from "@/components/guest-profile";
 import { AccountSafety } from "@/components/account-safety";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -8,6 +11,7 @@ import { FriendRequestButton } from "@/components/friend-request-button";
 
 export default async function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (guestModeEnabled) return <GuestProfile id={id} />;
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
     const supabase = await createClient();
     const [{ data: { user }, error: authError }, { data: profile, error: profileError }] = await Promise.all([
@@ -31,6 +35,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
         {(profile.major || profile.class_year) && <p className="profile-meta">{[profile.major, profile.class_year].filter(Boolean).join(" · ")}</p>}
         <h2>Things we could have in common</h2>
         {profile.interests.length ? <div className="interest-tags">{profile.interests.map((interest: string) => <span key={interest}>{interest}</span>)}</div> : <p className="body-copy">No interests added yet.</p>}
+        <ProfileSocialLinks links={profile.social_links} />
       </div></section>
     </div>;
   }

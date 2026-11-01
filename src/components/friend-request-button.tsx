@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { guestModeEnabled } from "@/lib/guest-mode";
+import { guestUserId } from "@/lib/guest-state";
+import { useGuest } from "./guest-provider";
 import { createClient } from "@/lib/supabase/client";
 
 type Request = { id: string; sender_id: string; recipient_id: string; status: "pending" | "accepted" | "rejected" };
@@ -11,6 +14,7 @@ function message(error: unknown) {
 }
 
 export function FriendRequestButton({ profileId, name }: { profileId: string; name: string }) {
+  const guest = useGuest();
   const [userId, setUserId] = useState("");
   const [request, setRequest] = useState<Request | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,6 +24,11 @@ export function FriendRequestButton({ profileId, name }: { profileId: string; na
   const [notice, setNotice] = useState("");
 
   async function load() {
+    if (guestModeEnabled) {
+      setUserId(guestUserId);
+      setRequest(guest.state.requests.find((item) => item.status !== "rejected" && [item.sender_id, item.recipient_id].includes(profileId)) ?? null);
+      setStatusLoaded(true); return;
+    }
     const supabase = createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError) throw authError;
@@ -36,17 +45,23 @@ export function FriendRequestButton({ profileId, name }: { profileId: string; na
   }
 
   useEffect(() => {
+    if (guestModeEnabled && !guest.ready) return;
     let active = true;
     void load().catch((loadError: unknown) => { if (active) setError(message(loadError)); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [profileId]);
+  }, [profileId, guest.ready, guest.state.requests]);
 
   async function act(action: "send" | "accept" | "decline") {
     setBusy(true);
     setError("");
     setNotice("");
     try {
+      if (guestModeEnabled) {
+        if (action === "send") guest.act({ type: "invite", request: { id: crypto.randomUUID(), sender_id: guestUserId, recipient_id: profileId, status: "pending", created_at: new Date().toISOString() } });
+        else if (request) guest.act({ type: "respond", requestId: request.id, accept: action === "accept" });
+        setNotice("Friend request updated in this browser demo."); return;
+      }
       const supabase = createClient();
       if (action === "send") {
         const { error: insertError } = await supabase.from("friend_requests").insert({ sender_id: userId, recipient_id: profileId });

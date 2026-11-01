@@ -20,6 +20,7 @@ export type NewEventInput = {
   meetingPoint: string;
   bring: string;
   capacity: number; // group size, including the host
+  tags?: string[];
 };
 
 export type NewEventField = "title" | "category" | "location" | "startsAt" | "description" | "meetingPoint" | "bring" | "capacity";

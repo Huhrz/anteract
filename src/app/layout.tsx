@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { GuestProvider } from "@/components/guest-provider";
 import { DemoProvider } from "@/components/demo-provider";
 import { EventProvider } from "@/components/event-provider";
 import { SiteShell } from "@/components/site-shell";
@@ -10,5 +11,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><DemoProvider><EventProvider><SiteShell>{children}</SiteShell></EventProvider></DemoProvider></body></html>;
+  return <html lang="en"><body><GuestProvider><DemoProvider><EventProvider><SiteShell>{children}</SiteShell></EventProvider></DemoProvider></GuestProvider></body></html>;
 }
