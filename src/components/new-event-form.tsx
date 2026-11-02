@@ -47,7 +47,12 @@ export default function NewEventForm() {
       });
       router.push(`/events/${id}`);
     } catch (createError) {
-      setError(createError instanceof Error ? createError.message : "Could not create the event.");
+      setError(
+        createError && typeof createError === "object" && "message" in createError
+          && typeof createError.message === "string" && createError.message
+          ? createError.message
+          : "Could not create the event. Please try again."
+      );
     } finally {
       setSaving(false);
     }

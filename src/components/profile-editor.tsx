@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { guestModeEnabled } from "@/lib/guest-mode";
 import { guestUserId } from "@/lib/guest-state";
 import { useGuest } from "./guest-provider";
+import { useEvents } from "./event-provider";
 import { SocialLinksEditor } from "./social-links-editor";
 import { parseSocialLinks, type SocialLink } from "@/lib/social-links";
 import { createClient } from "@/lib/supabase/client";
@@ -22,6 +24,8 @@ function errorMessage(error: unknown, fallback: string) {
 
 export default function ProfileEditor() {
   const guest = useGuest();
+  const router = useRouter();
+  const { refresh: refreshEvents } = useEvents();
   const [userId, setUserId] = useState("");
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -116,6 +120,10 @@ export default function ProfileEditor() {
       const updated = { id: userId, display_name: displayName, major, class_year: classYear, interests, social_links: parsedSocials.links, avatar_path: uploadedPath };
       const { data, error: saveError } = await supabase.from("profiles").upsert(updated).select("*").single();
       if (saveError) throw saveError;
+
+      // Profile writes also change event host names and previously visited profile pages.
+      router.refresh();
+      await refreshEvents();
 
       let signedPhoto = "";
       if (data.avatar_path) {
