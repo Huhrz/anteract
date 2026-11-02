@@ -38,6 +38,14 @@ test("old untagged events stay browseable and empty matches stay empty", () => {
   assert.equal(filterEvents(events, { ...defaultEventFilters, query: "  SCIENCE  " }, now).length, 6);
 });
 
+test("tag searches accept spaces, hyphens, and a leading hash", () => {
+  const tagged = [make("games", { tags: ["board-games"] }), make("other")];
+  for (const query of ["board games", "board-games", "#Board Games", "  BOARD   GAMES  "]) {
+    assert.deepEqual(filterEvents(tagged, { ...defaultEventFilters, query }, now).map((event) => event.id), ["games"]);
+  }
+  assert.deepEqual(filterEvents(tagged, { ...defaultEventFilters, query: "board games", tags: ["finals"] }, now), []);
+});
+
 test("today and seven-day boundaries use local calendar midnights", () => {
   const boundaries = [make("now", { startsAt: now.toISOString() }), make("just-before-midnight", { startsAt: new Date(2026, 10, 1, 23, 59, 59).toISOString() }), make("tomorrow", { startsAt: at(2, 0) }), make("last-day", { startsAt: at(7, 23) }), make("next-week", { startsAt: at(8, 0) })];
   assert.deepEqual(filterEvents(boundaries, { ...defaultEventFilters, when: "today" }, now).map((event) => event.id), ["just-before-midnight"]);

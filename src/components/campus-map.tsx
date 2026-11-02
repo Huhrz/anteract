@@ -2,7 +2,7 @@ import { getCampusMap } from "@/lib/campus-map";
 import type { Hangout } from "@/lib/hangouts";
 
 export function CampusMap({ event }: { event: Hangout }) {
-  const { url, location } = getCampusMap(event.campusLocationId, event.campusMapPlace);
+  const { url, location } = getCampusMap(event.campusLocationId, event.campusMapPlace, event.location);
   return <CampusMapPanel
     url={url}
     label={location?.label ?? event.location}

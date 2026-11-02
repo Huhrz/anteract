@@ -7,6 +7,8 @@ import { EventTagInput } from "./event-tag-input";
 import { parseEventTags } from "@/lib/event-tags";
 import { categories } from "@/lib/hangouts";
 import { useEvents } from "@/components/event-provider";
+import { getCampusMap, resolveCampusLocation, searchCampusLocations } from "@/lib/campus-map";
+import { CampusMapPanel } from "./campus-map";
 
 const eventCategories = categories.filter((category): category is Exclude<typeof category, "All"> => category !== "All");
 
@@ -14,6 +16,10 @@ export default function NewEventForm() {
   const router = useRouter();
   const { createEvent } = useEvents();
   const [tags, setTags] = useState("");
+  const [location, setLocation] = useState("");
+  const locationSuggestions = searchCampusLocations(location);
+  const selectedLocation = resolveCampusLocation(location);
+  const selectedMap = getCampusMap(undefined, undefined, location);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -37,7 +43,7 @@ export default function NewEventForm() {
       const id = await createEvent({
         title: String(form.get("title") ?? "").trim(),
         category: String(form.get("category")) as Exclude<typeof categories[number], "All">,
-        location: String(form.get("location") ?? "").trim(),
+        location: selectedLocation?.label ?? location.trim(),
         startsAt: startsAt.toISOString(),
         description: String(form.get("description") ?? "").trim(),
         meetingPoint: String(form.get("meeting_point") ?? "").trim(),
@@ -47,7 +53,12 @@ export default function NewEventForm() {
       });
       router.push(`/events/${id}`);
     } catch (createError) {
-      setError(createError instanceof Error ? createError.message : "Could not create the event.");
+      setError(
+        createError && typeof createError === "object" && "message" in createError
+          && typeof createError.message === "string" && createError.message
+          ? createError.message
+          : "Could not create the event. Please try again."
+      );
     } finally {
       setSaving(false);
     }
@@ -63,7 +74,10 @@ export default function NewEventForm() {
       <select id="event-category" name="category" required defaultValue="Study">{eventCategories.map((category) => <option key={category}>{category}</option>)}</select>
       <EventTagInput value={tags} onChange={setTags} disabled={saving} />
       <label htmlFor="event-location">Location</label>
-      <input id="event-location" name="location" required minLength={2} maxLength={120} placeholder="Science Library" />
+      <input id="event-location" name="location" required minLength={2} maxLength={120} placeholder="Search campus spots, e.g. ARC or Langson" value={location} onChange={(event) => setLocation(event.target.value)} list="event-location-suggestions" autoComplete="off" aria-describedby="event-location-help" />
+      <datalist id="event-location-suggestions">{locationSuggestions.map((place) => <option key={place.label} value={place.label}>{place.aliases.join(" · ")}</option>)}</datalist>
+      <p id="event-location-help" className="small-note">Search campus buildings by name or abbreviation, like DBH, HIB, or ARC. Verified pins open directly; other buildings show search results on the UCI map. Add room numbers and directions below in meeting point details.</p>
+      {selectedLocation && <CampusMapPanel url={selectedMap.url} label={selectedLocation.label} note={selectedMap.location?.note ?? "Find this building in the official UCI map search results. Add exact meeting instructions below."} />}
       <label htmlFor="event-time">Date and time</label>
       <input id="event-time" name="starts_at" type="datetime-local" required />
       <label htmlFor="event-description">Description</label>

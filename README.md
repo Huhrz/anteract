@@ -58,6 +58,8 @@ Search and marker URLs are documented by Concept3D: https://help.concept3d.com/h
 
 Official map: https://map.uci.edu/?id=463 . UCI's bridge reference: https://parking.uci.edu/traffic/access-clearance/ .
 
+The real event creation form also offers 93 campus location suggestions: the six pinned landmarks plus building names and abbreviations from the UCI Registrar directory (`https://www.reg.uci.edu/addl/campus/index.old`, retrieved November 2, 2026). The checked-in snapshot is `src/lib/campus-building-directory.js`; it is not a live directory. Searches accept names, abbreviations, and building numbers. These building numbers are not map marker IDs. Only the verified landmarks open exact pins; other suggestions open an official map search. Saved canonical names preserve that behavior after reloading an event. The map demos retain their smaller verified-pin catalog and share-link import.
+
 ## Where to edit
 
 - `src/app/page.tsx`: Home.
