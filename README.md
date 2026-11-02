@@ -39,7 +39,7 @@ In backend mode, events and memberships are stored in Supabase and shared across
 
 ## Campus map demo
 
-Open `/map-demo` to choose a location for one of three fictional sample events. No Supabase configuration or login is needed. This page demonstrates the location field. The reusable location picker is also available in `/create-demo`; the backend event form currently uses a location text field. Backend event pages require authentication unless the isolated guest demo is enabled.
+Open `/map-demo` to choose a location for one of three fictional sample events. No Supabase configuration or login is needed. This page demonstrates the location field. The backend event form uses a location text field with campus suggestions. Backend event pages require authentication unless the isolated guest demo is enabled.
 
 1. Enter a campus location name and press **Search UCI map**. The embedded official map displays real search results.
 2. For a quick match, press **Preview pin**, check the map, then **Use this location**. Quick matches are a small verified demo catalog (Science Library, Langson Library, ARC, Student Center, Aldrich Park, and Watson Bridge), not the live UCI index.
@@ -88,8 +88,6 @@ Blocks and reports persist in this browser alongside the agenda. These are demo 
 For production, authenticate the acting account on the server, store reports in a private moderation queue with access controls, and enforce blocks on both message delivery and conversation access in both directions. Never rely on browser state for enforcement or disclose the reporter to the reported account.
 
 ## Event discovery
-
-Open `/events-demo` without signing in to try filtering four fictional events. This page does not publish events or join anyone to real plans. `/create-demo` now previews interest tags with the same validation as the real event form.
 
 The real `/events` browser supports category, keyword, multiple interest tags (all must match), Today / Next 7 days / Upcoming, and open spots. Browse shows only future starts and sorts by start time. Tags on cards and event details link to a filtered browser. New events accept up to five tags of 24 characters; spaces become hyphens and duplicates are removed. Old events with no tags still work.
 
