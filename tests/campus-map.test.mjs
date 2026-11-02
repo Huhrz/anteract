@@ -1,6 +1,43 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { getCampusMap, getCampusSearchUrl, parseCampusShareLink, searchDemoPlaces } from "../src/lib/campus-map.ts";
+import { campusSearchPlaces, campusLocationSuggestions, getCampusMap, getCampusSearchUrl, parseCampusShareLink, searchDemoPlaces, searchCampusLocations, resolveCampusLocation } from "../src/lib/campus-map.ts";
+
+test("campus-wide suggestions support building names, abbreviations and numbers", () => {
+  assert.ok(campusLocationSuggestions.length > 80);
+  assert.equal(new Set(campusLocationSuggestions.map((place) => place.label)).size, campusLocationSuggestions.length);
+  for (const query of ["DBH", "Bren Hall", "314"]) {
+    assert.equal(searchCampusLocations(query)[0]?.label, "Donald Bren Hall (DBH)");
+  }
+  assert.equal(searchCampusLocations("HIB")[0]?.label, "Humanities Instructional Building (HIB)");
+  assert.ok(searchCampusLocations("engineering").length >= 5);
+  assert.deepEqual(searchCampusLocations("not a real campus building"), []);
+  assert.equal(resolveCampusLocation(" DBH ")?.label, "Donald Bren Hall (DBH)");
+});
+
+test("directory buildings use official name searches, never building numbers as marker IDs", () => {
+  const result = getCampusMap(undefined, undefined, "DBH");
+  assert.equal(result.location, undefined);
+  assert.equal(result.url, getCampusSearchUrl("Donald Bren Hall (DBH)"));
+  assert.equal(getCampusMap(undefined, undefined, "314").url, result.url);
+});
+
+test("saved location suggestions retain their exact pins after a database round trip", () => {
+  for (const place of campusSearchPlaces) {
+    const saved = JSON.parse(JSON.stringify({ location: place.label }));
+    assert.equal(getCampusMap(undefined, undefined, saved.location).url, `https://map.uci.edu/?id=463#!m/${place.markerId}`);
+  }
+  assert.equal(getCampusMap(undefined, undefined, " ARC ").location?.markerId, "1117541");
+  assert.equal(getCampusMap(undefined, undefined, "Science Library").location?.markerId, "83168");
+});
+
+test("partial and unknown names search the map without guessing a marker", () => {
+  for (const name of ["Library", "Science Library room 123", "Engineering & Computing"]) {
+    const result = getCampusMap(undefined, undefined, name);
+    assert.equal(result.location, undefined);
+    assert.equal(result.url, getCampusSearchUrl(name));
+  }
+  assert.equal(getCampusMap("aldrich-park", undefined, "ARC").location?.markerId, "126146");
+});
 
 test("official share links normalize to a single campus marker", () => {
   assert.deepEqual(parseCampusShareLink("https://map.uci.edu/?id=463#!m/1117786?share"), {

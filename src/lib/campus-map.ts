@@ -1,3 +1,5 @@
+import { campusBuildingDirectory } from "./campus-building-directory.js";
+
 export const campusLocations = {
   "science-library": {
     label: "Science Library (SLIB)",
@@ -48,7 +50,7 @@ const searchTokens = (value: string) => plain(value).split(" ").filter((word) =>
 
 // Every typed word has to match something, so "sci lib" finds the Science
 // Library and "rec center" finds the ARC. Better matches come first.
-function scorePlace(place: (typeof campusSearchPlaces)[number], tokens: string[]) {
+function scorePlace(place: { label: string; aliases: readonly string[] }, tokens: string[]) {
   const phrases = [plain(place.label), ...place.aliases.map(plain)];
   const words = phrases.flatMap((phrase) => phrase.split(" "));
   const whole = tokens.join(" ");
@@ -70,6 +72,25 @@ export function searchDemoPlaces(query: string): CampusMapPlace[] {
     .filter((match) => match.score > 0)
     .sort((a, b) => b.score - a.score || a.order - b.order)
     .map(({ place }) => ({ label: place.label, markerId: place.markerId }));
+}
+
+export const campusLocationSuggestions = [...campusSearchPlaces, ...campusBuildingDirectory];
+
+export function searchCampusLocations(query: string) {
+  const tokens = searchTokens(query);
+  if (!tokens.length) return campusLocationSuggestions;
+  return campusLocationSuggestions
+    .map((place, order) => ({ place, order, score: scorePlace(place, tokens) }))
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score || a.order - b.order)
+    .map(({ place }) => place);
+}
+
+export function resolveCampusLocation(label: string) {
+  const normalized = plain(label);
+  return normalized ? campusLocationSuggestions.find((place) =>
+    [place.label, ...place.aliases].some((name) => plain(name) === normalized)
+  ) : undefined;
 }
 
 // Splits text into pieces so the parts that match the search can be bold.
@@ -113,7 +134,13 @@ export function parseCampusShareLink(value: string): { markerId: string; url: st
 // Official UCI / Concept3D share links. IDs verified against map.uci.edu.
 // Watson Bridge connects the campus and UTC across Campus Drive:
 // https://parking.uci.edu/traffic/access-clearance/
-export function getCampusMap(locationId?: string, chosenPlace?: CampusMapPlace) {
+export function getCampusMap(locationId?: string, chosenPlace?: CampusMapPlace, locationLabel?: string) {
+  // Shared events persist the location name. Resolve exact catalog names/aliases
+  // after loading them too; partial matches must never silently choose a pin.
+  const normalizedLabel = plain(locationLabel ?? "");
+  const namedPlace = normalizedLabel ? campusSearchPlaces.find((place) =>
+    [place.label, ...place.aliases].some((name) => plain(name) === normalizedLabel)
+  ) : undefined;
   const preset = locationId && Object.hasOwn(campusLocations, locationId)
     ? campusLocations[locationId as CampusLocationId]
     : undefined;
@@ -122,11 +149,15 @@ export function getCampusMap(locationId?: string, chosenPlace?: CampusMapPlace) 
     label: chosenPlace.label.trim(),
     markerId: chosenPlace.markerId,
     note: "This pin marks the selected campus location. Follow the host’s meeting instructions for the exact gathering spot.",
-  } : preset;
+  } : preset ?? (namedPlace ? {
+    label: namedPlace.label,
+    markerId: namedPlace.markerId,
+    note: "This pin marks the selected campus location. Follow the host’s meeting instructions for the exact gathering spot.",
+  } : undefined);
   return {
     url: location
       ? `${officialMapUrl}#!m/${location.markerId}`
-      : officialMapUrl,
+      : getCampusSearchUrl(resolveCampusLocation(locationLabel ?? "")?.label ?? locationLabel ?? ""),
     location,
   };
 }
