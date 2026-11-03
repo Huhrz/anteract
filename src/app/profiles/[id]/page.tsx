@@ -33,6 +33,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
         </div>
         <p className="eyebrow">UCI STUDENT</p><h1>{profile.display_name}</h1>
         {(profile.major || profile.class_year) && <p className="profile-meta">{[profile.major, profile.class_year].filter(Boolean).join(" · ")}</p>}
+        {profile.bio && <><h2>A little about me</h2><p className="body-copy profile-bio">{profile.bio}</p></>}
         <h2>Things we could have in common</h2>
         {profile.interests.length ? <div className="interest-tags">{profile.interests.map((interest: string) => <span key={interest}>{interest}</span>)}</div> : <p className="body-copy">No interests added yet.</p>}
         <ProfileSocialLinks links={profile.social_links} />

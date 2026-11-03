@@ -23,6 +23,7 @@ export function GuestProfile({ id }: { id: string }) {
     <section className="profile-card"><div className="profile-cover blue"><span aria-hidden="true">✦</span><span>GOOD COMPANY STARTS HERE</span></div><div className="profile-body">
       <div className="profile-heading"><span className="avatar profile-avatar blue">{own && guest.state.profile.photoUrl ? <img src={guest.state.profile.photoUrl} alt="" /> : profileInitials(name)}</span>{own ? <Link className="secondary" href="/profile">Edit profile</Link> : <FriendRequestButton profileId={id} name={name} />}</div>
       <p className="eyebrow">GUEST DEMO PROFILE</p><h1>{name}</h1><p className="profile-meta">{own ? [guest.state.profile.major, guest.state.profile.class_year].filter(Boolean).join(" · ") : `${person!.major} · ${person!.year}`}</p>
+      {own && guest.state.profile.bio && <><h2>A little about me</h2><p className="body-copy profile-bio">{guest.state.profile.bio}</p></>}
       {person && <><h2>A little about me</h2><p className="body-copy">{person.bio}</p><AccountSafety person={person} showChat /></>}
       <h2>Things we could have in common</h2><div className="interest-tags">{interests.map((interest) => <span key={interest}>{interest}</span>)}</div>
       <ProfileSocialLinks links={own ? guest.state.profile.social_links : undefined} />

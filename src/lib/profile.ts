@@ -6,6 +6,7 @@ export type Profile = {
   major: string;
   class_year: string;
   interests: string[];
+  bio?: string;
   avatar_path: string | null;
   social_links?: SocialLink[];
 };

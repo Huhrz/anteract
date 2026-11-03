@@ -839,3 +839,126 @@ html { scroll-padding-top: 120px; }
   .floating-header, .floating-header .nav-link, .home-page *, .home-reveal { animation: none !important; transition: none !important; }
   .home-page .home-reveal, .home-page :is(.primary, .text-link, .join, .card):hover, .floating-header .nav-link:hover, .floating-header .nav-link:active { transform: none; opacity: 1; }
 }
+
+/* Profile studio — a personal introduction, with a live view of the result. */
+.profile-editor.profile-studio { max-width: 1136px; padding: 10px 0 40px; }
+.profile-studio-toolbar { display: none; align-items: center; justify-content: flex-end; margin-bottom: 20px; min-height: 28px; }
+.profile-studio-toolbar .eyebrow { margin: 0; color: var(--muted); font-size: 10px; }
+.profile-studio-layout { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+.profile-form.studio-form { grid-column: 1; grid-row: 1; max-width: none; min-width: 0; padding: 0; border: 0; background: transparent; gap: 0; }
+.studio-fields { display: grid; gap: 18px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.profile-edit-section { padding: 28px; border: 1px solid var(--line); border-radius: 22px; background: var(--surface); }
+.edit-section-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.edit-section-heading h2 { font-size: 18px; letter-spacing: -.4px; }
+.edit-section-heading h2 > span { margin-left: 5px; color: var(--muted); font-size: 11px; font-weight: 400; letter-spacing: 0; }
+.edit-section-heading p { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.edit-section-icon { display: grid; place-items: center; width: 34px; height: 34px; flex-shrink: 0; border-radius: 11px; background: var(--soft); color: var(--navy); font-size: 11px; font-weight: 700; }
+.studio-photo-row { display: flex; align-items: center; gap: 22px; margin-bottom: 28px; }
+.avatar-upload { position: relative; width: 88px; height: 88px; flex-shrink: 0; padding: 0; border: 3px solid var(--surface); border-radius: 50%; background: var(--soft); color: var(--navy); box-shadow: 0 0 0 1px var(--line); font-size: 30px; }
+.avatar-upload > img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.camera-overlay { position: absolute; bottom: -2px; right: -4px; display: grid; place-items: center; width: 30px; height: 30px; background: var(--gold); color: #153e63; border: 3px solid var(--surface); border-radius: 50%; }
+.studio-photo-row .upload-photo-button { border-radius: 999px; font-size: 12px; min-height: 40px; padding: 9px 17px; }
+.studio-photo-row .small-note { margin: 10px 0 0; font-size: 10px; line-height: 1.6; }
+.studio-field { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+.studio-field label { font-size: 12px; font-weight: 600; }
+.studio-field label > span { color: var(--muted); font-weight: 400; margin-left: 4px; font-size: 10px; }
+.studio-field :is(input, select, textarea) { width: 100%; min-width: 0; min-height: 46px; padding: 13px 14px; border: 1px solid var(--line); border-radius: 11px; background: var(--page); color: var(--ink); font: inherit; font-size: 13px; line-height: 1.6; transition: border-color 180ms ease, box-shadow 180ms ease; }
+.studio-field :is(input, textarea)::placeholder { color: var(--muted); opacity: .85; }
+.studio-field :is(input, select, textarea):focus { border-color: var(--navy); box-shadow: 0 0 0 3px color-mix(in srgb, var(--navy) 9%, transparent); }
+.studio-field textarea { resize: vertical; min-height: 124px; }
+.studio-field-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+.field-counter { text-align: right; color: var(--muted); font-size: 10px; }
+.interest-count { color: var(--muted); font-size: 11px; margin-left: auto; flex-shrink: 0; }
+.editable-interests { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0 0 16px; list-style: none; }
+.editable-interests:empty { display: none; }
+.editable-interests li { display: flex; align-items: center; padding-left: 13px; border: 1px solid color-mix(in srgb, var(--navy) 20%, var(--line)); border-radius: 999px; background: var(--soft); color: var(--navy); font-size: 12px; max-width: 100%; }
+.editable-interests li > span { overflow-wrap: anywhere; }
+.editable-interests button { border: 0; border-radius: 50%; background: transparent; color: var(--navy); min-height: 38px; min-width: 38px; font-size: 19px; }
+.editable-interests button:hover { background: color-mix(in srgb, var(--navy) 10%, transparent); }
+.interest-entry { flex-direction: row; gap: 8px; margin-bottom: 10px; }
+.interest-entry > input { flex: 1; }
+.interest-entry > button { border-radius: 11px; min-width: 62px; }
+.studio-form .small-note { font-size: 11px; line-height: 1.6; }
+.interest-suggestions { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 16px; }
+.interest-suggestions button { min-height: 34px; padding: 7px 11px; border: 1px dashed var(--line); border-radius: 999px; background: transparent; color: var(--muted); font-size: 11px; }
+.interest-suggestions button:hover:not(:disabled) { border-color: var(--navy); color: var(--navy); background: var(--soft); }
+.studio-form .social-editor { border: 0; padding: 0; margin: 0; }
+.studio-form .social-editor legend { margin-bottom: 8px; font-size: 18px; letter-spacing: -.4px; }
+.studio-form .social-editor legend > span { font-size: 11px; letter-spacing: 0; }
+.social-editor-row { grid-template-columns: 22px 110px minmax(0, 1fr) 32px; }
+.social-editor-icon { display: grid; place-items: center; color: var(--navy); }
+.studio-form .social-editor-row :is(input, select) { font-size: 12px; border-radius: 10px; background: var(--page); padding: 10px; }
+.studio-form .social-add { border-radius: 999px; }
+.profile-feedback:not(:empty) { margin-top: 18px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.studio-preview { grid-column: 2; grid-row: 1; position: sticky; top: 118px; min-width: 0; text-align: center; }
+.preview-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-inline: 4px; }
+.preview-heading h2 { font-size: 14px; letter-spacing: 0; }
+.preview-heading > span { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 10px; }
+.preview-heading i { width: 6px; height: 6px; background: #739b81; border-radius: 50%; }
+.editor-preview-card { overflow: hidden; border: 1px solid var(--line); border-radius: 24px; background: var(--surface); text-align: left; box-shadow: 0 12px 38px #153e6309; }
+.editor-preview-cover { position: relative; display: flex; align-items: flex-start; justify-content: space-between; height: 122px; padding: 23px; background: #153e63; color: #f6c849; overflow: hidden; }
+.editor-preview-cover::after { content: ""; position: absolute; width: 160px; height: 160px; border: 1px solid #ffffff26; border-radius: 50%; right: -30px; top: -70px; box-shadow: 0 0 0 28px #ffffff08; }
+.editor-preview-cover > span { font-size: 8px; letter-spacing: 1.5px; line-height: 1.7; }
+.editor-preview-cover img { padding: 10px; background: #f6c849; border-radius: 50%; transform: rotate(-12deg); margin-top: 18px; z-index: 1; }
+.editor-preview-body { padding: 0 28px 28px; }
+.editor-preview-avatar { position: relative; margin-top: -34px; margin-bottom: 18px; width: 82px; height: 82px; display: grid; place-items: center; background: var(--soft); color: var(--navy); border: 5px solid var(--surface); border-radius: 50%; font-size: 24px; font-weight: 700; }
+.editor-preview-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.editor-campus-label { display: inline-block; color: var(--muted); font-size: 10px; margin-bottom: 10px; }
+.editor-preview-body h3 { font-size: 28px; letter-spacing: -.8px; color: var(--ink); margin: 0 0 8px; overflow-wrap: anywhere; }
+.editor-preview-meta { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.7; overflow-wrap: anywhere; }
+.editor-preview-section { margin-top: 25px; }
+.editor-preview-section h4 { font-size: 12px; margin: 0 0 11px; }
+.editor-preview-section p { font-size: 12px; line-height: 1.85; color: var(--muted); margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.editor-preview-section .preview-placeholder { font-style: italic; }
+.editor-preview-interests { display: flex; flex-wrap: wrap; gap: 7px; }
+.editor-preview-interests > span { padding: 8px 12px; border-radius: 999px; background: color-mix(in srgb, var(--gold) 18%, var(--surface)); color: var(--ink); border: 1px solid color-mix(in srgb, var(--gold) 32%, var(--line)); font-size: 11px; overflow-wrap: anywhere; }
+.editor-preview-socials { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 25px; padding-top: 18px; border-top: 1px solid var(--line); }
+.editor-preview-socials a { display: flex; align-items: center; gap: 7px; min-height: 40px; padding: 8px 10px; border-radius: 10px; color: var(--navy); background: var(--soft); font-size: 10px; }
+.editor-preview-socials svg { width: 17px; height: 17px; }
+.preview-caption { font-size: 11px; line-height: 1.8; color: var(--muted); margin: 18px 0 12px; }
+.studio-preview > .text-link { display: inline-block; margin-top: 16px; font-size: 11px; }
+.profile-save-bar { position: sticky; bottom: 16px; z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 20px; margin-top: 24px; border: 1px solid var(--line); border-radius: 20px; background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(18px); box-shadow: 0 8px 32px #153e6320; }
+.profile-save-bar strong { display: block; color: var(--ink); font-size: 12px; }
+.profile-save-bar > div > span { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
+.profile-save-actions { display: flex; gap: 12px; align-items: center; }
+.profile-save-actions .primary { border-radius: 999px; font-size: 12px; }
+.profile-save-actions .quiet-button { min-height: 44px; }
+.mobile-preview-toggle { display: none; }
+.profile-bio { white-space: pre-wrap; overflow-wrap: anywhere; }
+.profile-studio :is(button, .editor-preview-socials a) { transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease; }
+@media (prefers-reduced-motion: no-preference) {
+  .profile-save-bar { animation: home-enter 220ms ease both; }
+}
+@media (max-width: 1000px) {
+  .profile-studio-layout { gap: 20px; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+  .profile-edit-section { padding: 22px; }
+  .studio-form .social-editor-row { grid-template-columns: 22px minmax(0, 1fr) 32px; }
+  .studio-form .social-link-url { grid-column: 1 / -1; grid-row: 2; }
+  .studio-form .social-link-remove { grid-column: 3; grid-row: 1; }
+}
+@media (max-width: 800px) {
+  .profile-studio-layout { grid-template-columns: minmax(0, 1fr); }
+  .profile-form.studio-form { grid-row: auto; }
+  .studio-preview { grid-column: 1; grid-row: auto; display: none; position: static; }
+  .studio-preview.is-preview-open { display: block; grid-row: 1; }
+  .profile-studio-toolbar { display: flex; }
+  .mobile-preview-toggle { display: inline-flex; gap: 12px; padding: 10px 15px; border-radius: 999px; font-size: 12px; }
+  .profile-save-bar { bottom: calc(8px + env(safe-area-inset-bottom)); }
+}
+@media (max-width: 600px) {
+  .profile-editor.profile-studio { padding-top: 0; }
+  .profile-edit-section { padding: 20px; }
+  .studio-field-pair { grid-template-columns: 1fr; }
+  .studio-field :is(input, select, textarea), .studio-form .social-editor-row :is(input, select) { font-size: 16px; }
+  .social-editor-row { grid-template-columns: 22px minmax(0, 1fr) 32px; }
+  .social-link-remove { grid-column: 3; }
+  .profile-save-bar { padding: 12px; gap: 8px; flex-wrap: wrap; }
+  .profile-save-bar > div > span { display: none; }
+  .profile-save-actions { gap: 8px; margin-left: auto; }
+  .profile-save-actions .primary { padding: 12px 15px; gap: 10px; }
+  .editable-interests button, .interest-suggestions button { min-height: 44px; }
+  .profile-studio-toolbar .eyebrow { font-size: 8px; letter-spacing: 1px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .profile-studio *, .profile-studio *::before, .profile-studio *::after { animation: none !important; transition: none !important; }
+}
