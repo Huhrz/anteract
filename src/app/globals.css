@@ -828,10 +828,7 @@ html { scroll-padding-top: 120px; }
 }
 @media (max-width: 480px) {
   .header.floating-header { width: calc(100% - 24px); margin-bottom: 0; padding: 8px; }
-  .navigation-space { height: 187px; }
-  html { scroll-padding-top: 195px; }
-  #main-content { scroll-margin-top: 195px; }
-  .floating-header .nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-radius: 20px; }
+  .navigation-space { height: 140px; }
   .floating-header .brand { font-size: 20px; margin-left: 6px; }
   .floating-header .nav-link { padding-inline: 5px; font-size: 11px; }
   .floating-header .nav-count { font-size: 9px; min-width: 15px; margin-left: 3px; padding-inline: 3px; }

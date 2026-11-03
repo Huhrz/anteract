@@ -162,8 +162,6 @@ export default function ProfileEditor() {
   const displayName = profile?.display_name ?? "";
 
   return <section className="profile-editor">
-    <Link className="back-link" href="/">← Home</Link>
-    <div className="page-heading"><p className="eyebrow">YOUR ANTERACT PROFILE</p><h1>Make it yours<span className="gold-dot">.</span></h1><p className="intro">Share a little about yourself so UCI students know who they might meet.</p></div>
     <form className="profile-form" onSubmit={save}>
       <div className="profile-photo-field">
         {photoUrl ? <img className="profile-photo-preview" src={photoUrl} alt="Profile photo preview" /> : <div className="profile-photo-placeholder" aria-hidden="true">{displayName ? displayName.slice(0, 1).toUpperCase() : "?"}</div>}

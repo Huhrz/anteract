@@ -82,6 +82,7 @@ export function AccountSettings({ publicPage = false }: { publicPage?: boolean }
       <fieldset className="appearance-options"><legend>Appearance</legend><div>{["light", "dark", "system"].map(value => <button type="button" key={value} aria-pressed={appearance === value} onClick={() => changeAppearance(value)}>{value === "light" ? "☀" : value === "dark" ? "☾" : "◐"}<span>{value[0].toUpperCase() + value.slice(1)}</span></button>)}</div></fieldset>
       {storageNotice && <p className="small-note" role="status">{storageNotice}</p>}
       <div className="settings-actions">
+        <Link href="/profile" onClick={() => setOpen(false)}>Profile <span aria-hidden="true">↗</span></Link>
         {guestModeEnabled ? <p className="small-note">You’re exploring without an account. Account actions become available when signed in.</p> : publicPage ? <Link href="/login">Log in <span aria-hidden="true">↗</span></Link> : <>
           <button disabled={busy} onClick={logout}>{busy ? "Please wait…" : "Log out"}<span aria-hidden="true">↗</span></button>
           <button className="settings-danger" disabled={busy} onClick={() => { setError(""); setConfirmation(""); dialog.current?.showModal(); }}>Delete account <span aria-hidden="true">×</span></button>

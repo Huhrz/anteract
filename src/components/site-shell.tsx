@@ -67,7 +67,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       window.cancelAnimationFrame(frame);
     };
   }, [pathname]);
-  const links = [{ href: "/", label: "Home" }, { href: "/events", label: "Browse" }, { href: "/my-events", label: "Events" }, { href: "/chat", label: "Messages" }, { href: "/friends", label: "Friends" }, { href: "/profile", label: "Profile" }];
+  const links = [{ href: "/", label: "Home" }, { href: "/events", label: "Browse" }, { href: "/my-events", label: "Events" }, { href: "/chat", label: "Messages" }, { href: "/friends", label: "Friends" }];
   if (pathname === "/login" || pathname.startsWith("/auth/")) return <>
     <a className="skip-link" href="#main-content">Skip to content</a>
     <main id="main-content" className="welcome-main">{children}</main>
