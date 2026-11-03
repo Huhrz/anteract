@@ -75,3 +75,7 @@ Review and apply `migrations/20261103050528_direct_messaging.sql` before deployi
 ## Message requests, blocks, and reports
 
 Apply `migrations/20261103054033_message_requests_and_profile_safety.sql` after direct messaging. It adds nonfriend message requests, recipient consent, bilateral messaging/friend-invitation blocks, and private persisted profile reports. Existing messages and conversations are preserved. See [REQUESTS_AND_SAFETY.md](./REQUESTS_AND_SAFETY.md) for behavior, security, setup, and administrator report review.
+
+## Unread message counts
+
+Apply `migrations/20261103060311_direct_message_unread_counts.sql` after message requests/profile safety. It adds private persistent read positions, unread counts on conversations and folders, and a combined navigation badge. See [UNREAD_COUNTS.md](./UNREAD_COUNTS.md) for exact manual setup, privacy rules, and verification.

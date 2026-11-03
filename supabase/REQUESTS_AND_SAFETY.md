@@ -5,7 +5,7 @@ Apply `migrations/20261103054033_message_requests_and_profile_safety.sql` after 
 ## Behavior
 
 - Existing conversations remain accepted. A new conversation between accepted friends enters Messages immediately.
-- Other verified UCI students can send one introductory message. The recipient sees it under Requests, with Accept and Decline. Sent requests also appear in the sender's Requests folder. Empty unsent conversations are not shown as incoming requests.
+- Other verified UCI students can send one introductory message. The recipient sees it under Requests, with Accept and Decline. Outgoing requests appear in the sender's Messages folder; Requests is recipient-only. Empty unsent conversations are not shown as incoming requests.
 - Only the recipient can decide a pending request. Acceptance moves it into the main inbox for both users and enables replies. Declining prevents more messages and reopening the same pair does not create another request.
 - Request acceptance is independent of friendship. Students can chat after accepting a message request without accepting a friend request.
 - Send message, Add friend, Block/Unblock, and Report are available on other students' public profiles. Block/Report are also available in chat headers. There are no actions to message, block, or report yourself.

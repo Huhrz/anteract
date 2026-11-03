@@ -120,3 +120,7 @@ This project had no supabase_migrations tables visible during inspection; the SQ
 ## Message requests and safety update
 
 The accepted-friends-only sending rule above describes the initial Stage 2 migration. Apply the later `20261103054033_message_requests_and_profile_safety.sql` migration for the current behavior: friends enter the main inbox directly, nonfriends can send one introductory request, and accepted requests allow chatting independently of friendship. Bilateral blocks and private persisted reports are now supported. See [REQUESTS_AND_SAFETY.md](./REQUESTS_AND_SAFETY.md).
+
+## Unread count update
+
+The later `20261103060311_direct_message_unread_counts.sql` migration adds private read tracking and unread badges without exposing read receipts. See [UNREAD_COUNTS.md](./UNREAD_COUNTS.md). Apply it after the requests/profile-safety migration.

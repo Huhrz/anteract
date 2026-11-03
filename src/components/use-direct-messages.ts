@@ -29,6 +29,8 @@ export function useDirectMessages(recipientId?: string) {
   const pending = useRef<{ id: string; content: string; conversation: string } | null>(null);
   const sendingLock = useRef(false);
   const olderLock = useRef(false);
+  const readAcknowledged = useRef<DirectMessage | null>(null);
+  const readPending = useRef(new Set<string>());
 
   function merge(rows: DirectMessage[]) {
     currentMessages.current = mergeMessages(currentMessages.current, rows);
@@ -50,6 +52,7 @@ export function useDirectMessages(recipientId?: string) {
     setUserId(""); setSendError(""); setHasOlder(false); setLoadingOlder(false); setSending(false); setResponding(false);
     currentMessages.current = []; pending.current = null;
     sendingLock.current = false; olderLock.current = false;
+    readAcknowledged.current = null; readPending.current.clear();
     const valid = () => alive && generation.current === run;
 
     async function initialize() {
@@ -76,7 +79,7 @@ export function useDirectMessages(recipientId?: string) {
           const { data, error: listError } = await db.rpc("list_direct_conversations").select("*")
             .order("last_created_at", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }).order("id").range(offset, offset + 99);
           if (listError) throw listError;
-          if (data?.some((item: DirectConversation) => !item.status || !item.initiated_by)) throw new Error("Messaging setup is incomplete. Apply the latest message requests and profile safety migration.");
+          if (data?.some((item: DirectConversation) => !item.status || !item.initiated_by || item.unread_count === undefined)) throw new Error("Messaging setup is incomplete. Apply the latest messaging migration, including unread counts.");
           all.push(...(data ?? []) as DirectConversation[]);
           if (!data || data.length < 100) break;
         }
@@ -148,6 +151,7 @@ export function useDirectMessages(recipientId?: string) {
       const overview = db.channel(`dm-list:${uid}:${run}:${crypto.randomUUID()}`)
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, () => { if (valid()) scheduleList(); })
         .on("postgres_changes", { event: "*", schema: "public", table: "conversations" }, () => { if (valid()) scheduleList(); })
+        .on("postgres_changes", { event: "*", schema: "public", table: "conversation_reads", filter: `user_id=eq.${uid}` }, () => { if (valid()) scheduleList(); })
         .subscribe(status => channelStatus("overview", status));
       const activeChannel = conversationId ? db.channel(`dm-thread:${conversationId}:${run}:${crypto.randomUUID()}`)
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${conversationId}` }, payload => {
@@ -157,11 +161,13 @@ export function useDirectMessages(recipientId?: string) {
       window.addEventListener("focus", onFocus);
       window.addEventListener("online", onFocus);
       window.addEventListener("profile-safety-changed", onFocus);
+      window.addEventListener("direct-message-read", scheduleList);
       interval = setInterval(onFocus, 30_000);
       cleanup = () => {
         clearTimeout(refreshTimer); clearInterval(interval);
         window.removeEventListener("focus", onFocus); window.removeEventListener("online", onFocus);
         window.removeEventListener("profile-safety-changed", onFocus);
+        window.removeEventListener("direct-message-read", scheduleList);
         auth.data.subscription.unsubscribe();
         void db.removeChannel(overview); if (activeChannel) void db.removeChannel(activeChannel);
       };
@@ -206,6 +212,25 @@ export function useDirectMessages(recipientId?: string) {
     } catch (e) { if (generation.current === run) setSendError(messagingError(e)); return false; }
     finally { if (generation.current === run) { sendingLock.current = false; setSending(false); } }
   }
+  async function markRead(messageId: string) {
+    const marker = currentMessages.current.find(item => item.id === messageId);
+    if (!active || !client.current || !marker || active.messaging_blocked || readPending.current.has(messageId)
+      || (readAcknowledged.current && compareMessages(marker, readAcknowledged.current) <= 0)) return;
+    const run = generation.current;
+    readPending.current.add(messageId);
+    try {
+      const { error } = await client.current.rpc("mark_direct_conversation_read", { thread_id: active.id, message_id: messageId });
+      if (error) throw error;
+      if (generation.current !== run) return;
+      if (!readAcknowledged.current || compareMessages(marker, readAcknowledged.current) > 0) readAcknowledged.current = marker;
+      const acknowledged = readAcknowledged.current;
+      const unread_count = currentMessages.current.filter(item => item.sender_id !== userId && compareMessages(item, acknowledged) > 0).length;
+      setConversations(current => current.map(item => item.id === active.id ? { ...item, unread_count } : item));
+      setActive(current => current?.id === active.id ? { ...current, unread_count } : current);
+      window.dispatchEvent(new Event("direct-message-read"));
+    } catch (e) { if (generation.current === run) setError(`Could not mark messages as read. ${messagingError(e)}`); }
+    finally { if (generation.current === run) readPending.current.delete(messageId); }
+  }
   async function respond(accept: boolean) {
     if (!active || !client.current || responding) return;
     const run = generation.current;
@@ -221,5 +246,5 @@ export function useDirectMessages(recipientId?: string) {
     } catch (e) { if (run === generation.current) setError(messagingError(e)); }
     finally { if (run === generation.current) setResponding(false); }
   }
-  return { respond, responding, conversations, active, messages, userId, loading, error, connection, hasOlder, loadingOlder, loadOlder, send, sending, sendError, retry: () => setAttempt(value => value + 1) };
+  return { markRead, respond, responding, conversations, active, messages, userId, loading, error, connection, hasOlder, loadingOlder, loadOlder, send, sending, sendError, retry: () => setAttempt(value => value + 1) };
 }

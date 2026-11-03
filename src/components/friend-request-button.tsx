@@ -77,7 +77,7 @@ export function FriendRequestButton({ profileId, name }: { profileId: string; na
   return <div className="friend-actions">
     {request?.status === "accepted" ? <span className="friend-state">✓ Friends</span>
       : incoming ? <><button className="primary" type="button" disabled={busy} onClick={() => void act("accept")}>Accept request</button><button className="quiet-button" type="button" disabled={busy} onClick={() => void act("decline")}>Decline</button></>
-      : request?.status === "pending" ? <span className="friend-state">Request sent</span>
+      : request?.status === "pending" ? <span className="friend-request-sent"><span className="friend-request-sent-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m21 3-7 18-4-7-7-4 18-7Z" /><path d="m10 14 6-6" /></svg></span>Request sent<svg className="friend-request-sent-check" width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m4 10 4 4 8-8" /></svg></span>
       : <button className="primary" type="button" disabled={busy} onClick={() => void act("send")}>{busy ? "Sending…" : "Add friend"}</button>}
     {error && <span className="friend-error" role="alert">{error}</span>}
     {notice && <span className="small-note" role="status">{notice}</span>}

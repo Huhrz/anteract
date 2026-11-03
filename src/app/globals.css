@@ -1179,3 +1179,12 @@ html { scroll-padding-top: 120px; }
   .public-profile-actions > .profile-safety { align-items: flex-start; margin-left: 0; }
   .shared-profile-actions { margin-top: 16px; padding-bottom: 18px; }
 }
+
+.friend-request-sent { display: inline-flex; align-items: center; gap: 9px; min-height: 42px; padding: 7px 13px 7px 8px; border: 1px solid color-mix(in srgb, var(--gold) 38%, var(--line)); border-radius: 999px; background: linear-gradient(120deg, color-mix(in srgb, var(--gold) 12%, var(--surface)), color-mix(in srgb, var(--navy) 5%, var(--surface))); color: var(--navy); box-shadow: 0 2px 6px #153e6306; font-size: 12px; font-weight: 600; letter-spacing: .1px; white-space: nowrap; }
+.friend-request-sent-icon { display: grid; place-items: center; flex: 0 0 26px; height: 26px; border-radius: 50%; background: color-mix(in srgb, var(--gold) 23%, var(--surface)); }
+.friend-request-sent-check { margin-left: 2px; opacity: .65; }
+.conversation-preview { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.messenger .conversation-preview > small { flex: 1; min-width: 0; }
+.conversation-unread-badge { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--navy); color: var(--surface); font-size: 10px; font-weight: 700; }
+.messenger .conversation.is-unread strong { font-weight: 750; }
+.messenger .conversation.is-unread small { color: var(--ink); font-weight: 600; }

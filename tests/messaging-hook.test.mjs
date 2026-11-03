@@ -6,11 +6,11 @@ import * as helpers from '../src/lib/messaging.ts';
 const source=stripTypeScriptTypes(readFileSync(new URL('../src/components/use-direct-messages.ts',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function useDirectMessages','function useDirectMessages');
 const row=(id='message-1')=>({id,conversation_id:'thread-a',sender_id:'me',content:'Hello',created_at:'2026-11-03T00:00:00.123456+00:00'});
 function harness({failInsert=false}={}){
-  const slots=[],effects=[],channels=[],removed=[],inserts=[];
-  let index=0,hook,output,authCallback,sendFails=failInsert,history=[row()],since=[],list=[{id:'thread-a',recipient_id:'friend',display_name:'A Friend',avatar_path:null,created_at:row().created_at,last_created_at:row().created_at,last_content:'Hello',last_sender_id:'me',status:'accepted',initiated_by:'me',messaging_blocked:false}];
+  const slots=[],effects=[],channels=[],removed=[],inserts=[],rpcCalls=[];
+  let index=0,hook,output,authCallback,sendFails=failInsert,history=[row()],since=[],list=[{id:'thread-a',recipient_id:'friend',display_name:'A Friend',avatar_path:null,created_at:row().created_at,last_created_at:row().created_at,last_content:'Hello',last_sender_id:'me',status:'accepted',initiated_by:'me',messaging_blocked:false,unread_count:0}];
   const window=new EventTarget();
   const db={auth:{getUser:async()=>({data:{user:{id:'me',email:'me@uci.edu',email_confirmed_at:'yes'}}}),onAuthStateChange:fn=>{authCallback=fn;return {data:{subscription:{unsubscribe(){}}}};}},
-    rpc(name){const result={data:name==='start_direct_conversation'?'thread-a':name==='list_direct_conversations'?list:name==='direct_message_history'?history:since,error:null};const chain={then(resolve,reject){return Promise.resolve(result).then(resolve,reject);},select(){return chain;},order(){return chain;},range(){return chain;}};return chain;},
+    rpc(name,args){rpcCalls.push({name,args});const result={data:name==='start_direct_conversation'?'thread-a':name==='list_direct_conversations'?list:name==='direct_message_history'?history:since,error:null};const chain={then(resolve,reject){return Promise.resolve(result).then(resolve,reject);},select(){return chain;},order(){return chain;},range(){return chain;}};return chain;},
     from(table){if(table==='conversations')return {update(value){const chain={eq(){return chain;},select(){return chain;},maybeSingle:async()=>({data:{id:'thread-a'},error:null})};return chain;}};return {insert(value){inserts.push(value);return {select(){return {single:async()=>sendFails?{error:new Error('Network failure')}:{data:{...row(value.id),content:value.content}}};}};}};},
     channel(name){const channel={name,handlers:[],on(_kind,filter,callback){channel.handlers.push({filter,callback});return channel;},subscribe(callback){channel.status=callback;channels.push(channel);return channel;}};return channel;},
     removeChannel(channel){removed.push(channel);return Promise.resolve();},storage:{from(){return {createSignedUrl:async()=>({data:null})};}}};
@@ -19,7 +19,7 @@ function harness({failInsert=false}={}){
   function render(recipient='friend'){index=0;output=hook(recipient);while(effects.length)effects.shift()();return output;}
   async function settle(){for(let i=0;i<3;i++)await new Promise(resolve=>setImmediate(resolve));return render();}
   render();
-  return {render,settle,channels,removed,inserts,window,get output(){return output;},setFail(value){sendFails=value;},setList(value){list=value;},setConsent(status){list=list.map(item=>({...item,status,initiated_by:'friend'}));},setHistory(value){history=value;},setSince(value){since=value;},auth:()=>authCallback('SIGNED_OUT',null),cleanup(){for(const slot of slots)slot?.cleanup?.();}};
+  return {render,settle,channels,removed,inserts,rpcCalls,window,get output(){return output;},setFail(value){sendFails=value;},setList(value){list=value;},setConsent(status){list=list.map(item=>({...item,status,initiated_by:'friend'}));},setHistory(value){history=value;},setSince(value){since=value;},auth:()=>authCallback('SIGNED_OUT',null),cleanup(){for(const slot of slots)slot?.cleanup?.();}};
 }
 test('active subscription merges Realtime and confirmed sends by ID and cleans up on unmount',async()=>{
   const h=harness();try{let state=await h.settle();assert.equal(state.active.id,'thread-a');assert.equal(h.channels.length,2);
@@ -46,4 +46,12 @@ test('accepting a message request updates its local inbox state immediately',asy
 });
 test('declining a request removes it from pending without accepting it',async()=>{
  const h=harness();try{h.setConsent('pending');await h.settle();assert.equal(h.output.active.status,'pending');await h.output.respond(false);assert.equal(h.render().active.status,'declined');assert.equal(h.render().conversations[0].status,'declined');}finally{h.cleanup();}
+});
+
+test('read marking only acknowledges loaded messages, avoids duplicate writes, and synchronizes badges',async()=>{
+ const h=harness();try{await h.settle();await h.output.markRead('not-loaded');assert.equal(h.rpcCalls.filter(x=>x.name==='mark_direct_conversation_read').length,0);
+ await h.output.markRead('message-1');await h.output.markRead('message-1');assert.equal(h.rpcCalls.filter(x=>x.name==='mark_direct_conversation_read').length,1);
+ assert.equal(h.render().active.unread_count,0);
+ const overview=h.channels.find(x=>x.name.startsWith('dm-list'));assert.ok(overview.handlers.some(x=>x.filter.table==='conversation_reads'&&x.filter.filter==='user_id=eq.me'));
+ }finally{h.cleanup();}
 });

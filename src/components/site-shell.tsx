@@ -4,10 +4,14 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { AccountSettings } from "./account-settings";
 import { usePathname } from "next/navigation";
+import { useUnreadMessages } from "./unread-messages-provider";
+import { unreadLabel } from "@/lib/messaging";
 import { useEvents } from "./event-provider";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const unread = useUnreadMessages();
+  const unreadCount = unread.messages + unread.requests;
   const { events, loading } = useEvents();
   const header = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -81,7 +85,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       <nav className="nav" aria-label="Main navigation">{links.map((link) => {
         const active = link.href === "/" ? pathname === "/" : pathname === link.href || pathname.startsWith(`${link.href}/`);
         const myEventCount = events.filter((event) => event.isJoined || event.isHost).length;
-        return <Link key={link.href} href={link.href} className={active ? "nav-link active" : "nav-link"} aria-current={active ? "page" : undefined}>{link.label}{link.href === "/my-events" && !loading && myEventCount > 0 && <span className="nav-count" aria-label={`${myEventCount} joined or hosted events`}>{myEventCount}</span>}</Link>;
+        return <Link key={link.href} href={link.href} className={active ? "nav-link active" : "nav-link"} aria-current={active ? "page" : undefined}>{link.label}{link.href === "/chat" && unreadCount > 0 && <span className="nav-count" aria-label={`${unreadCount} unread messages and requests`}>{unreadLabel(unreadCount)}</span>}{link.href === "/my-events" && !loading && myEventCount > 0 && <span className="nav-count" aria-label={`${myEventCount} joined or hosted events`}>{myEventCount}</span>}</Link>;
       })}</nav>
       <AccountSettings />
     </header>
