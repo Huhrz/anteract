@@ -11,7 +11,7 @@ import { ProfilePreview } from "./profile-preview";
 import { SocialLinksEditor } from "./social-links-editor";
 import { parseSocialLinks, type SocialLink } from "@/lib/social-links";
 import { createClient } from "@/lib/supabase/client";
-import { parseInterests, profilePhotoBucket, profilePhotoMaxBytes, type Profile } from "@/lib/profile";
+import { profileInitials, parseInterests, profilePhotoBucket, profilePhotoMaxBytes, type Profile } from "@/lib/profile";
 
 type Draft = { display_name: string; major: string; class_year: string; bio: string; interests: string[] };
 const emptyDraft: Draft = { display_name: "", major: "", class_year: "", bio: "", interests: [] };
@@ -233,7 +233,7 @@ export default function ProfileEditor() {
             <div className="edit-section-heading"><span className="edit-section-icon" aria-hidden="true">01</span><div><h2 id="profile-details-title">Profile Details</h2></div></div>
             <div className="studio-photo-row">
               <button type="button" className="avatar-upload" onClick={() => fileInput.current?.click()} aria-label="Change profile photo">
-                {previewPhoto ? <img src={previewPhoto} alt="" /> : <span>{draft.display_name.trim().slice(0, 1).toUpperCase() || "A"}</span>}
+                {previewPhoto ? <img src={previewPhoto} alt="" /> : <span>{profileInitials(draft.display_name) || "A"}</span>}
                 <span className="camera-overlay"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M4 6h4l2-3h4l2 3h4v15H4z" /><circle cx="12" cy="13" r="4" /></svg></span>
               </button>
               <div><button type="button" className="secondary upload-photo-button" onClick={() => fileInput.current?.click()}>Upload photo</button><p className="small-note" id="photo-help">JPG, PNG or WebP · up to 5 MB</p></div>
