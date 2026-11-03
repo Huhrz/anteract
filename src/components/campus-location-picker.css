@@ -12,11 +12,11 @@
 /* Search box and suggestions */
 .lp-combo { position: relative; }
 .lp-input-row { display: flex; align-items: center; gap: 12px; }
-.lp-input-row input, .lp-import input { flex: 1; width: 100%; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: white; color: var(--ink); font: inherit; font-size: 14px; }
+.lp-input-row input, .lp-import input { flex: 1; width: 100%; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; }
 .lp-input-row input:focus-visible, .lp-import input:focus-visible { outline: 3px solid #3d82af; outline-offset: 2px; border-color: var(--navy); }
 .lp-input-row .quiet-button { white-space: nowrap; }
 .lp-hint { margin: 8px 2px 0; font-size: 12px; color: var(--muted); line-height: 1.6; }
-.lp-list { position: absolute; z-index: 20; left: 0; right: 0; top: 56px; margin: 0; padding: 6px; list-style: none; max-height: 340px; overflow-y: auto; background: white; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 14px 30px rgba(21, 62, 99, 0.14); }
+.lp-list { position: absolute; z-index: 20; left: 0; right: 0; top: 56px; margin: 0; padding: 6px; list-style: none; max-height: 340px; overflow-y: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 14px 30px rgba(21, 62, 99, 0.14); }
 .lp-list li { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 8px; cursor: pointer; }
 .lp-list li.active { background: #edf3f8; }
 .lp-option-icon { display: grid; place-items: center; flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; background: #fbefcd; color: #8d6d20; font-size: 15px; }
@@ -26,7 +26,7 @@
 .lp mark { background: #fbe9a8; color: inherit; border-radius: 3px; padding: 0 1px; }
 
 /* Pick any place from the official map */
-.lp-more { margin: 18px 0 0; border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; background: white; }
+.lp-more { margin: 18px 0 0; border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; background: var(--surface); }
 .lp-more summary { font-size: 12px; color: var(--navy); cursor: pointer; line-height: 1.7; font-weight: 600; }
 .lp-more ol { margin: 14px 0 0; padding-left: 20px; display: grid; gap: 12px; font-size: 12px; color: var(--muted); line-height: 1.7; }
 .lp-more li > span { display: block; }
@@ -36,7 +36,7 @@
 .lp-import input { margin-bottom: 8px; font-size: 13px; padding: 12px; }
 .lp-import .secondary { justify-self: start; }
 
-.lp-confirm { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 16px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px; background: white; }
+.lp-confirm { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 16px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
 .lp-confirm strong { display: block; font-size: 13px; }
 .lp-confirm small { display: block; margin-top: 4px; font-size: 11px; color: var(--muted); }
 .lp-error { margin: 14px 0 0; color: #9e3038; font-size: 12px; line-height: 1.7; }

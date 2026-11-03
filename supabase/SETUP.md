@@ -55,3 +55,9 @@ Tags describe interests and do not enforce friends-only or club-only access. Exi
 ## Profile social links
 
 Before deploying the updated profile editor to a real backend, review and apply `migrations/202611010002_profile_social_links.sql` after the profiles migration. It adds a `social_links` JSONB array with an empty default, a five-link maximum, platform labels and HTTPS URL checks. Existing profile read/write policies continue to control access. The client normalizes and validates the same platform/link pairs before saving. Guest-mode changes stay in local browser storage and do not require this migration.
+
+## Account settings and deletion
+
+Set `SUPABASE_SECRET_KEY` (or legacy `SUPABASE_SERVICE_ROLE_KEY`) in the server environment to enable `DELETE /api/account`. Never prefix this secret with `NEXT_PUBLIC_`. The route checks the same-origin request, explicit confirmation, and verified UCI session, and derives the target account from Supabase `getUser()`. It removes all files in the user's profile-photo folder, revokes refresh sessions, then hard-deletes the auth user. Existing foreign-key cascades remove their profile, friend requests, hosted events, and event memberships. Storage removal and auth deletion are separate operations; a later failure can leave the account without its photo and requires signing in again to retry. Existing access JWTs expire normally; deleting the user does not cryptographically invalidate them. The endpoint verifies the user with Auth on every request.
+
+The header settings include logout and Light/Dark/System appearance saved in this browser. Guest mode exposes appearance without pretending to have a deletable account. Profile editing is available through My Profile in the main navigation. Validate permanent deletion using a disposable verified account with a photo and hosted event before deployment; never use a real student's account for testing.
