@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { symbols } from "@/lib/hangouts";
+import { eventCategoryTone, eventCategorySymbol } from "@/lib/hangouts";
 import type { SharedEvent } from "./event-provider";
 import { useEvents } from "./event-provider";
 import { EventTags } from "./event-tags";
@@ -15,7 +15,7 @@ export function EventCard({ event }: { event: SharedEvent }) {
   const joined = event.isJoined;
   const full = event.participants >= event.capacity;
   return <article className="card">
-    <Link className={`card-art ${event.category.toLowerCase()}`} href={`/events/${event.id}`} aria-label={`Details for ${event.title}`}><span aria-hidden="true">{symbols[event.category]}</span><span className="category-label">{event.category}</span></Link>
+    <Link className={`card-art ${eventCategoryTone(event.category)}`} href={`/events/${event.id}`} aria-label={`Details for ${event.title}`}><span aria-hidden="true">{eventCategorySymbol(event.category)}</span><span className="category-label">{event.category}</span></Link>
     <div className="card-body">
       <p className="time">{event.time}</p><h3><Link href={`/events/${event.id}`}>{event.title}</Link></h3>
       <p className="location"><EventLocation event={event} /></p><p className="description">{event.description}</p>

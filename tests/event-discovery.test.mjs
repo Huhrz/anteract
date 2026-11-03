@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { parseEventTags } from "../src/lib/event-tags.ts";
-import { filterEvents, defaultEventFilters } from "../src/lib/event-filters.ts";
+import { filterEvents, defaultEventFilters, eventCategoryOptions } from "../src/lib/event-filters.ts";
 
 test("tags normalize consistently without silently dropping invalid or extra tags", () => {
   assert.deepEqual(parseEventTags(" #Coffee, coffee, First Years, , board-games "), { ok: true, tags: ["coffee", "first-years", "board-games"] });
@@ -50,4 +50,12 @@ test("today and seven-day boundaries use local calendar midnights", () => {
   const boundaries = [make("now", { startsAt: now.toISOString() }), make("just-before-midnight", { startsAt: new Date(2026, 10, 1, 23, 59, 59).toISOString() }), make("tomorrow", { startsAt: at(2, 0) }), make("last-day", { startsAt: at(7, 23) }), make("next-week", { startsAt: at(8, 0) })];
   assert.deepEqual(filterEvents(boundaries, { ...defaultEventFilters, when: "today" }, now).map((event) => event.id), ["just-before-midnight"]);
   assert.deepEqual(filterEvents(boundaries, { ...defaultEventFilters, when: "week" }, now).map((event) => event.id), ["just-before-midnight", "tomorrow", "last-day"]);
+});
+
+test('custom categories become case-insensitive Browse filters and searchable event metadata',()=>{
+ const events=[{id:'a',title:'Evening meetup',category:'Board Games',location:'Campus',description:'Play together',tags:[],startsAt:'2099-11-03T18:00:00Z',participants:1,capacity:5},{id:'b',title:'Another meetup',category:'board games',location:'Campus',description:'Play together',tags:[],startsAt:'2099-11-04T18:00:00Z',participants:1,capacity:5}];
+ assert.deepEqual(eventCategoryOptions(events),['All','Study','Food','Active','Board Games']);
+ assert.equal(filterEvents(events,{...defaultEventFilters,category:'Board Games'},new Date('2099-11-01')).length,2);
+ assert.equal(filterEvents(events,{...defaultEventFilters,query:'board games'},new Date('2099-11-01')).length,2);
+ assert.deepEqual(eventCategoryOptions([], 'Arts'),['All','Study','Food','Active','Arts']);
 });

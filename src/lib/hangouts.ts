@@ -1,7 +1,7 @@
 import type { CampusLocationId, CampusMapPlace } from "./campus-map";
 
 export const categories = ["All", "Study", "Food", "Active"] as const;
-export type Category = (typeof categories)[number];
+export type Category = string;
 
 export type Hangout = {
   id: string;
@@ -23,3 +23,12 @@ export type Hangout = {
 };
 
 export const symbols = { Study: "✎", Food: "☕", Active: "↗" };
+
+// Category labels are user content; only known safe tones become CSS classes.
+export function eventCategoryTone(category: string): "study" | "food" | "active" | "custom" {
+  const name = category.trim().toLowerCase();
+  return name === "study" || name === "food" || name === "active" ? name : "custom";
+}
+export function eventCategorySymbol(category: string) {
+  return { study: symbols.Study, food: symbols.Food, active: symbols.Active, custom: "✦" }[eventCategoryTone(category)];
+}

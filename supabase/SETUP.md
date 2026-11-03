@@ -79,3 +79,7 @@ Apply `migrations/20261103054033_message_requests_and_profile_safety.sql` after 
 ## Unread message counts
 
 Apply `migrations/20261103060311_direct_message_unread_counts.sql` after message requests/profile safety. It adds private persistent read positions, unread counts on conversations and folders, and a combined navigation badge. See [UNREAD_COUNTS.md](./UNREAD_COUNTS.md) for exact manual setup, privacy rules, and verification.
+
+## Custom event categories
+
+Apply `migrations/20261103200517_custom_event_categories.sql` once before publishing custom categories. The file includes `BEGIN`/`COMMIT` and can be pasted directly into the configured project's SQL Editor. It replaces the existing three-option category CHECK with a 2–40 character, trimmed, non-control-text label; `All` is reserved for the Browse filter. Existing events, RLS, authentication, and capacity rules are unchanged. The client normalizes whitespace and the three preset names, and Browse groups category labels without case sensitivity. No new environment variables are needed. This migration is prepared for manual application and has not been applied remotely by the agent.

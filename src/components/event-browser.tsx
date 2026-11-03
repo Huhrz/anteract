@@ -5,8 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { EventCard } from "./event-card";
 import type { SharedEvent } from "./event-provider";
-import { categories } from "@/lib/hangouts";
-import { defaultEventFilters, filterEvents, type EventFilters } from "@/lib/event-filters";
+import { defaultEventFilters, filterEvents, eventCategoryOptions, type EventFilters } from "@/lib/event-filters";
 import { parseEventTags, tagLimits } from "@/lib/event-tags";
 
 type BrowserProps = { events: SharedEvent[]; loading?: boolean; error?: string };
@@ -37,6 +36,7 @@ function EventBrowserContent({ events, loading = false, error = "" }: BrowserPro
   const upcoming = events.filter((event) => Date.parse(event.startsAt) > now.getTime());
   const availableTags = [...new Set([...upcoming.flatMap((event) => event.tags ?? []), ...filters.tags])].sort();
   const filteredEvents = filterEvents(events, filters, now);
+  const categories = eventCategoryOptions(upcoming, filters.category);
   const activeCount = Number(filters.category !== "All") + Number(!!filters.query.trim()) + filters.tags.length + Number(filters.when !== "upcoming") + Number(filters.spotsOnly);
   const clear = () => update({ ...defaultEventFilters, tags: [] });
 
