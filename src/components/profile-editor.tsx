@@ -3,9 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { guestModeEnabled } from "@/lib/guest-mode";
-import { guestUserId } from "@/lib/guest-state";
-import { useGuest } from "./guest-provider";
 import { useEvents } from "./event-provider";
 import { ProfilePreview } from "./profile-preview";
 import { SocialLinksEditor } from "./social-links-editor";
@@ -29,7 +26,6 @@ function errorMessage(error: unknown, fallback: string) {
 }
 
 export default function ProfileEditor() {
-  const guest = useGuest();
   const router = useRouter();
   const { refresh: refreshEvents } = useEvents();
   const fileInput = useRef<HTMLInputElement>(null);
@@ -50,16 +46,6 @@ export default function ProfileEditor() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (guestModeEnabled) {
-      if (!guest.ready) return;
-      setUserId(guestUserId); setProfile(guest.state.profile);
-      const parsed = parseSocialLinks(guest.state.profile.social_links);
-      setSocialLinks(parsed.ok ? parsed.links : []);
-      const next = draftFrom(guest.state.profile);
-      setDraft(next); setBaseline(snapshot(next, parsed.ok ? parsed.links : []));
-      setPhotoUrl(guest.state.profile.photoUrl); setLoading(false);
-      return;
-    }
     let active = true;
     void (async () => {
       try {
@@ -91,7 +77,7 @@ export default function ProfileEditor() {
       }
     })();
     return () => { active = false; };
-  }, [guest.ready, guest.state.profile]);
+  }, []);
 
   const dirty = !loading && (!!photo || !!interestInput.trim() || snapshot(draft, socialLinks) !== baseline || (!profile && !!userId));
   useEffect(() => {
@@ -153,16 +139,6 @@ export default function ProfileEditor() {
     setNotice("");
     let uploadedPath: string | null = profile?.avatar_path ?? null;
     try {
-      if (guestModeEnabled) {
-        let savedPhoto = guest.state.profile.photoUrl;
-        if (photo) savedPhoto = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(new Error("Could not read the photo.")); reader.readAsDataURL(photo);
-        });
-        guest.act({ type: "profile", profile: { id: guestUserId, display_name: displayName, major, class_year: classYear, bio, interests, social_links: parsedSocials.links, avatar_path: null, photoUrl: savedPhoto } });
-        setInterestInput(""); setInterestError("");
-        setPhoto(null); setNotice("Your guest profile is saved in this browser.");
-        return;
-      }
       const supabase = createClient();
       if (photo) {
         const extension = photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";

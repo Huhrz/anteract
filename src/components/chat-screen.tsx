@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { people, type Person } from "@/lib/hangouts";
-import { AccountSafety } from "./account-safety";
-import { useDemo } from "./demo-provider";
+import { profileInitials } from "@/lib/profile";
+import { type DirectConversation, type DirectMessage } from "@/lib/messaging";
+import { useDirectMessages } from "./use-direct-messages";
 
 function messageTime(value: string, compact = false) {
   const date = new Date(value);
@@ -13,124 +13,108 @@ function messageTime(value: string, compact = false) {
     ? date.toLocaleDateString([], { month: "short", day: "numeric" })
     : date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
-
-function Avatar({ person }: { person: Person }) {
-  return <span className={`avatar ${person.color}`} aria-hidden="true">{person.initials}</span>;
+function Avatar({ person }: { person: DirectConversation }) {
+  return <span className="avatar blue" aria-hidden="true">{person.photoUrl ? <img src={person.photoUrl} alt="" /> : profileInitials(person.display_name)}</span>;
 }
-
-// The existing local store contains outgoing messages only. Direction is explicit
-// so incoming bubbles can use the same presentation when delivery is connected.
-function MessageBubble({ text, sentAt, outgoing = true }: { text: string; sentAt: string; outgoing?: boolean }) {
+function MessageBubble({ message, outgoing }: { message: DirectMessage; outgoing: boolean }) {
   return <div className={`message-row ${outgoing ? "outgoing" : "incoming"}`}>
-    <div className="message-bubble"><span className="sr-only">{outgoing ? "You: " : "Recipient: "}</span><p>{text}</p></div>
-    <time dateTime={sentAt} title={new Date(sentAt).toLocaleString()}>{messageTime(sentAt)}</time>
+    <div className="message-bubble"><span className="sr-only">{outgoing ? "You: " : "Recipient: "}</span><p>{message.content}</p></div>
+    <time dateTime={message.created_at} title={new Date(message.created_at).toLocaleString()}>{messageTime(message.created_at)}</time>
   </div>;
 }
 
-export function ChatScreen({ person }: { person?: Person }) {
-  const { storageError } = useDemo();
+export function ChatScreen({ recipientId }: { recipientId?: string }) {
+  const chat = useDirectMessages(recipientId);
   const [query, setQuery] = useState("");
-  return <section className={`messenger chat-layout ${person ? "has-active-chat" : ""}`} aria-label="Messages">
+  const matches = chat.conversations.filter(item => item.display_name.toLowerCase().includes(query.trim().toLowerCase()));
+  return <section className={`messenger chat-layout ${recipientId ? "has-active-chat" : ""}`} aria-label="Messages">
     <aside className="chat-sidebar" aria-label="Conversations">
       <header className="messenger-heading"><h1>Messages<span className="gold-dot">.</span></h1><Link href="/friends#my-friends" className="messenger-new" aria-label="Find a friend to message" title="Find a friend to message">＋</Link></header>
       <label className="conversation-search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 4.5 4.5" /></svg><span className="sr-only">Search conversations by name</span><input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search conversations" /></label>
-      <ConversationList person={person} query={query} />
-      <p className="messenger-local-note">Local demo · Saved on this browser</p>
+      <nav className="conversation-list" aria-label="Message conversations" aria-busy={chat.loading}>
+        {chat.loading ? <div className="conversation-placeholder" role="status">Loading conversations…</div> : !matches.length ? <div className="conversation-placeholder"><strong>{query.trim() ? "No conversations found" : "No conversations yet"}</strong></div> : matches.map(contact => <Link className={`conversation ${contact.recipient_id === recipientId ? "active" : ""}`} key={contact.id} href={`/chat/${contact.recipient_id}`} scroll={false} aria-current={contact.recipient_id === recipientId ? "page" : undefined}>
+          <Avatar person={contact} /><span className="conversation-copy"><span className="conversation-topline"><strong>{contact.display_name}</strong>{contact.last_created_at && <time dateTime={contact.last_created_at} title={new Date(contact.last_created_at).toLocaleString()}>{messageTime(contact.last_created_at, true)}</time>}</span><small>{contact.last_content ? `${contact.last_sender_id === chat.userId ? "You: " : ""}${contact.last_content}` : "Start a conversation"}</small></span>
+        </Link>)}
+      </nav>
+      <p className="messenger-local-note messenger-connection" role="status">{chat.connection === "Connected" && <span className="messenger-connected-dot" aria-hidden="true" />}{chat.connection}</p>
+      {chat.error && !recipientId && <MessagingError error={chat.error} retry={chat.retry} />}
     </aside>
-    {person ? <ActiveChat key={person.id} person={person} /> : <div className="chat-panel messenger-welcome"><span className="messenger-welcome-icon" aria-hidden="true">↗</span><h2>Your next hello starts here</h2><p>Choose a conversation or visit a friend’s profile to start one.</p><Link className="secondary" href="/friends#my-friends">Find your friends</Link></div>}
-    {storageError && <p className="sr-only" role="alert">Browser storage is unavailable. Messages will be lost on refresh.</p>}
+    {recipientId ? chat.active ? <ActiveChat key={chat.active.id} chat={chat} person={chat.active} /> : <div className="chat-panel messenger-welcome"><Link href="/chat" className="text-link">← Back to conversations</Link>{chat.loading ? <p role="status">Loading conversation…</p> : <MessagingError error={chat.error || "Conversation unavailable. Choose an accepted friend to message."} retry={chat.retry} />}</div> : <div className="chat-panel messenger-welcome"><span className="messenger-welcome-icon" aria-hidden="true">↗</span><h2>Your next hello starts here</h2><p>Choose a conversation or visit a friend’s profile to start one.</p><Link className="secondary" href="/friends#my-friends">Find your friends</Link></div>}
   </section>;
 }
-
-function ConversationList({ person, query }: { person?: Person; query: string }) {
-  const { state, ready } = useDemo();
-  const conversations = people.filter(contact => state.conversations[contact.id]?.length || contact.id === person?.id)
-    .sort((a, b) => Date.parse(state.conversations[b.id]?.at(-1)?.sentAt ?? "1970-01-01") - Date.parse(state.conversations[a.id]?.at(-1)?.sentAt ?? "1970-01-01"));
-  const matches = conversations.filter(contact => contact.name.toLowerCase().includes(query.trim().toLowerCase()));
-  return <nav className="conversation-list" aria-label="Message conversations" aria-busy={!ready}>
-    {!ready ? <div className="conversation-placeholder" role="status">Loading conversations…</div> : !matches.length ? <div className="conversation-placeholder" role="status"><strong>{query.trim() ? "No conversations found" : "No conversations yet"}</strong><p>{query.trim() ? "Try another name." : "Open a friend’s profile to say hello."}</p>{query.trim() && <p>Search only includes your conversations.</p>}</div> : matches.map(contact => {
-      const latest = state.conversations[contact.id]?.at(-1);
-      return <Link className={`conversation ${contact.id === person?.id ? "active" : ""}`} key={contact.id} href={`/chat/${contact.id}`} scroll={false} aria-current={contact.id === person?.id ? "page" : undefined}>
-        <Avatar person={contact} /><span className="conversation-copy"><span className="conversation-topline"><strong>{contact.name}</strong>{latest && <time dateTime={latest.sentAt} title={new Date(latest.sentAt).toLocaleString()}>{messageTime(latest.sentAt, true)}</time>}</span><small>{state.blockedAccounts.includes(contact.id) ? "Blocked account" : latest ? `You: ${latest.text}` : "Start a conversation"}</small></span>
-      </Link>;
-    })}
-  </nav>;
+function MessagingError({ error, retry }: { error: string; retry: () => void }) {
+  return <div className="messaging-error"><p role="alert">{error}</p><button className="quiet-button" type="button" onClick={retry}>Try again</button>{error.includes("sign in") && <Link className="text-link" href="/login">Sign in</Link>}</div>;
 }
-
-function ActiveChat({ person }: { person: Person }) {
-  const { state, ready, dispatch, storageError } = useDemo();
+function ActiveChat({ person, chat }: { person: DirectConversation; chat: ReturnType<typeof useDirectMessages> }) {
   const [draft, setDraft] = useState("");
-  const [notice, setNotice] = useState("");
   const [showLatest, setShowLatest] = useState(false);
   const thread = useRef<HTMLDivElement>(null);
   const composer = useRef<HTMLTextAreaElement>(null);
   const followLatest = useRef(true);
-  const blocked = state.blockedAccounts.includes(person.id);
-  const messages = state.conversations[person.id] ?? [];
-
+  const prependPosition = useRef<{ height: number; top: number; first: string } | null>(null);
+  const lastMessage = chat.messages.at(-1)?.id;
+  const previousLast = useRef(lastMessage);
   function scrollToLatest() {
-    const element = thread.current;
-    if (element) element.scrollTop = element.scrollHeight;
-    followLatest.current = true;
-    setShowLatest(false);
+    if (thread.current) thread.current.scrollTop = thread.current.scrollHeight;
+    followLatest.current = true; setShowLatest(false);
   }
-  useEffect(() => {
-    if (followLatest.current) scrollToLatest();
-    else setShowLatest(true);
-  }, [messages.length, ready]);
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const element = thread.current;
+    if (!element) return;
+    const position = prependPosition.current;
+    if (position && chat.messages[0]?.id !== position.first) {
+      element.scrollTop = position.top + element.scrollHeight - position.height;
+      prependPosition.current = null;
+    } else if (followLatest.current) scrollToLatest();
+    else if (lastMessage !== previousLast.current) setShowLatest(true);
+    previousLast.current = lastMessage;
+  }, [chat.messages, lastMessage]);
+  useLayoutEffect(() => {
     const element = thread.current;
     if (!element) return;
     const observer = new ResizeObserver(() => { if (followLatest.current) element.scrollTop = element.scrollHeight; });
-    observer.observe(element);
-    return () => observer.disconnect();
+    observer.observe(element); return () => observer.disconnect();
   }, []);
-  useEffect(() => { setDraft(""); setNotice(""); }, [blocked]);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!composer.current) return;
     composer.current.style.height = "auto";
     composer.current.style.height = `${Math.min(composer.current.scrollHeight, 128)}px`;
   }, [draft]);
-
-  function send(event: FormEvent<HTMLFormElement>) {
+  async function send(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const text = draft.trim();
-    if (!ready || blocked || !text || text.length > 1000) return;
-    dispatch({ type: "message", personId: person.id, message: { id: crypto.randomUUID(), text, sentAt: new Date().toISOString() } });
-    setDraft("");
-    setNotice("Message saved locally. Nothing was sent to another person.");
-    composer.current?.focus();
+    const sentDraft = draft;
+    if (await chat.send(sentDraft)) {
+      setDraft(current => current === sentDraft ? "" : current);
+      composer.current?.focus();
+    }
   }
-
+  async function older() {
+    const element = thread.current;
+    if (!element || chat.loadingOlder) return;
+    followLatest.current = false;
+    prependPosition.current = { height: element.scrollHeight, top: element.scrollTop, first: chat.messages[0]?.id ?? "" };
+    await chat.loadOlder();
+  }
   return <div className="chat-panel">
-    <header className="chat-header">
-      <Link href="/chat" className="chat-mobile-back" aria-label="Back to conversations">←</Link>
-      <Link className="host-line large chat-recipient" href={`/profiles/${person.id}`}><Avatar person={person} /><span><strong>{person.name}</strong><small>View profile <span aria-hidden="true">↗</span></small></span></Link>
-      <AccountSafety key={person.id} person={person} />
-    </header>
-    <p className="chat-demo-note">Local demo · Messages stay in this browser. No real messages are delivered.</p>
-    <div className="message-thread" ref={thread} tabIndex={0} role="log" aria-label={`Conversation with ${person.name}`} aria-live="polite" aria-relevant="additions" aria-busy={!ready} onScroll={() => {
+    <header className="chat-header"><Link href="/chat" className="chat-mobile-back" aria-label="Back to conversations">←</Link><Link className="host-line large chat-recipient" href={`/profiles/${person.recipient_id}`}><Avatar person={person} /><span><strong>{person.display_name}</strong><small>View profile <span aria-hidden="true">↗</span></small></span></Link></header>
+    {chat.error && <MessagingError error={chat.error} retry={chat.retry} />}
+    <div className="message-thread" ref={thread} tabIndex={0} role="log" aria-label={`Conversation with ${person.display_name}`} aria-live="polite" aria-relevant="additions" onScroll={() => {
       const element = thread.current;
       if (!element) return;
       followLatest.current = element.scrollHeight - element.scrollTop - element.clientHeight < 64;
       if (followLatest.current) setShowLatest(false);
     }}>
-      {!ready ? <p className="conversation-placeholder" role="status">Loading conversation…</p> : messages.length ? messages.map((message, index) => {
-        const previous = messages[index - 1];
-        const newDay = !previous || new Date(previous.sentAt).toDateString() !== new Date(message.sentAt).toDateString();
-        return <div className="message-entry" key={message.id}>{newDay && <div className="message-day"><time dateTime={message.sentAt}>{new Date(message.sentAt).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}</time></div>}<MessageBubble text={message.text} sentAt={message.sentAt} /></div>;
-      }) : <div className="chat-empty"><Avatar person={person} /><h2>Say hello to {person.name.split(" ")[0]}</h2><p>This is the start of your conversation.</p><button className="suggestion" type="button" disabled={!ready || blocked} onClick={() => { setDraft("Hey! Looking forward to the hangout. Where should we meet?"); composer.current?.focus(); }}>Hey! Where should we meet? <span aria-hidden="true">↗</span></button></div>}
+      {chat.hasOlder && <button className="quiet-button history-more" type="button" disabled={chat.loadingOlder} onClick={() => void older()}>{chat.loadingOlder ? "Loading…" : "Load earlier messages"}</button>}
+      {chat.messages.length ? chat.messages.map((message, index) => {
+        const previous = chat.messages[index - 1];
+        const newDay = !previous || new Date(previous.created_at).toDateString() !== new Date(message.created_at).toDateString();
+        return <div className="message-entry" key={message.id}>{newDay && <div className="message-day"><time dateTime={message.created_at}>{new Date(message.created_at).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}</time></div>}<MessageBubble message={message} outgoing={message.sender_id === chat.userId} /></div>;
+      }) : <div className="chat-empty"><Avatar person={person} /><h2>Say hello to {person.display_name.split(" ")[0]}</h2><p>This is the start of your conversation.</p></div>}
     </div>
     {showLatest && <button className="chat-jump" type="button" onClick={scrollToLatest}>Jump to latest <span aria-hidden="true">↓</span></button>}
-    <div className="chat-composer">
-      <form className="message-form" onSubmit={send}>
-        <label className="sr-only" htmlFor="message">Message {person.name}</label>
-        <textarea ref={composer} id="message" name="message" rows={1} placeholder={blocked ? "Unblock this account to message" : `Message ${person.name.split(" ")[0]}…`} maxLength={1000} disabled={!ready || blocked} value={draft} onChange={event => setDraft(event.target.value)} onKeyDown={event => {
-          if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); }
-        }} />
-        <button className="primary" type="submit" aria-label="Send message" disabled={!ready || blocked || !draft.trim()}>Send <span aria-hidden="true">↑</span></button>
-      </form>
-      <p className="chat-status" role="status">{storageError ? "Browser storage unavailable. Messages will be lost on refresh." : blocked ? "Account blocked. Unblock to send messages." : notice || "Enter to send · Shift+Enter for a new line"}</p>
-    </div>
+    <div className="chat-composer"><form className="message-form" onSubmit={event => void send(event)}><label className="sr-only" htmlFor="message">Message {person.display_name}</label><textarea ref={composer} id="message" name="message" rows={1} placeholder={`Message ${person.display_name.split(" ")[0]}…`} maxLength={1000} disabled={!chat.userId} value={draft} onChange={event => setDraft(event.target.value)} onKeyDown={event => {
+      if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); }
+    }} /><button className="primary" type="submit" aria-label="Send message" disabled={!chat.userId || chat.sending || !draft.trim()}>{chat.sending ? "Sending…" : "Send"}<span aria-hidden="true">↑</span></button></form>
+    {chat.sendError && <p className="messaging-send-error" role="alert">{chat.sendError} Your message is kept above; select Send to retry.</p>}<p className="chat-status">Enter to send · Shift+Enter for a new line</p></div>
   </div>;
 }

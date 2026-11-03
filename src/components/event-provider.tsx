@@ -2,9 +2,6 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { guestModeEnabled } from "@/lib/guest-mode";
-import { guestUserId } from "@/lib/guest-state";
-import { useGuest } from "./guest-provider";
 import { parseEventTags } from "@/lib/event-tags";
 import type { Category, Hangout } from "@/lib/hangouts";
 
@@ -51,14 +48,12 @@ function getErrorMessage(error: unknown) {
 }
 
 export function EventProvider({ children }: { children: React.ReactNode }) {
-  const guest = useGuest();
   const [events, setEvents] = useState<SharedEvent[]>([]);
   const [userId, setUserId] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const refresh = useCallback(async () => {
-    if (guestModeEnabled) return;
     setLoading(true);
     setError("");
     try {
@@ -105,11 +100,6 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
   async function createEvent(event: NewEvent) {
     const parsedTags = parseEventTags(event.tags);
     if (!parsedTags.ok) throw new Error(parsedTags.error);
-    if (guestModeEnabled) {
-      const id = crypto.randomUUID();
-      guest.act({ type: "create", event: { ...event, id, time: formatEventTime(event.startsAt), tags: parsedTags.tags, hostName: guest.state.profile.display_name, hostId: guestUserId, participants: 1, attendeeIds: [], isHost: true, isJoined: false } });
-      return id;
-    }
     const supabase = createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError) throw authError;
@@ -135,7 +125,6 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function joinEvent(eventId: string) {
-    if (guestModeEnabled) { guest.act({ type: "join", eventId }); return; }
     const supabase = createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError) throw authError;
@@ -146,7 +135,6 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function leaveEvent(eventId: string) {
-    if (guestModeEnabled) { guest.act({ type: "leave", eventId }); return; }
     const supabase = createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError) throw authError;
@@ -157,14 +145,13 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function cancelEvent(eventId: string) {
-    if (guestModeEnabled) { guest.act({ type: "cancel", eventId }); return; }
     const supabase = createClient();
     const { error: deleteError } = await supabase.from("events").delete().eq("id", eventId);
     if (deleteError) throw deleteError;
     await refresh();
   }
 
-  return <EventContext.Provider value={{ events: guestModeEnabled ? guest.state.events.map((event) => ({ ...event, time: formatEventTime(event.startsAt) })) : events, userId: guestModeEnabled ? guestUserId : userId, loading: guestModeEnabled ? !guest.ready : loading, error: guestModeEnabled ? "" : error, refresh, createEvent, joinEvent, leaveEvent, cancelEvent }}>{children}</EventContext.Provider>;
+  return <EventContext.Provider value={{ events, userId, loading, error, refresh, createEvent, joinEvent, leaveEvent, cancelEvent }}>{children}</EventContext.Provider>;
 }
 
 export function useEvents() {

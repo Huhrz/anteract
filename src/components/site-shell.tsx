@@ -3,19 +3,20 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { AccountSettings } from "./account-settings";
-import { guestModeEnabled } from "@/lib/guest-mode";
-import { emptyState } from "@/lib/demo-state";
-import { useGuest } from "./guest-provider";
 import { usePathname } from "next/navigation";
 import { useEvents } from "./event-provider";
-import { useDemo } from "./demo-provider";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const guest = useGuest();
   const { events, loading } = useEvents();
-  const { storageError, dispatch } = useDemo();
   const header = useRef<HTMLElement>(null);
+  useEffect(() => {
+    // Remove retired local-only data, preserving auth and appearance settings.
+    try {
+      localStorage.removeItem("anteract-guest-v1");
+      localStorage.removeItem("anteract-demo-v1");
+    } catch {}
+  }, []);
   useEffect(() => {
     const element = header.current;
     if (!element) return;
@@ -82,12 +83,9 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         const myEventCount = events.filter((event) => event.isJoined || event.isHost).length;
         return <Link key={link.href} href={link.href} className={active ? "nav-link active" : "nav-link"} aria-current={active ? "page" : undefined}>{link.label}{link.href === "/my-events" && !loading && myEventCount > 0 && <span className="nav-count" aria-label={`${myEventCount} joined or hosted events`}>{myEventCount}</span>}</Link>;
       })}</nav>
-      <AccountSettings publicPage={pathname === "/map-demo"} />
+      <AccountSettings />
     </header>
-    {guestModeEnabled && <div className="guest-banner"><span><strong>Guest demo</strong> · Try events, friends and profiles. Changes stay in this browser.</span><button type="button" onClick={() => { if (window.confirm("Reset your guest events, profile, friends and local messages?")) { guest.reset(); dispatch({ type: "hydrate", state: emptyState }); } }}>Reset sample data</button></div>}
-    {guestModeEnabled && guest.storageError && <p className="storage-warning" role="status">This browser could not save guest data. Your changes will last until you refresh.</p>}
-    {storageError && <p className="storage-warning" role="status">This browser can’t save your demo. Changes will last until you refresh.</p>}
     <main id="main-content">{children}</main>
-    <footer><span>anteract · A little more connected.</span><span>Sample events and messaging are demo features.</span></footer>
+    <footer><span>anteract · A little more connected.</span><span>Connect with your UCI community.</span></footer>
   </>;
 }

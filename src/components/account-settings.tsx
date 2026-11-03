@@ -3,10 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { guestModeEnabled } from "@/lib/guest-mode";
-import { storageKey } from "@/lib/demo-state";
 
-export function AccountSettings({ publicPage = false }: { publicPage?: boolean }) {
+export function AccountSettings() {
   const panel = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
@@ -65,7 +63,7 @@ export function AccountSettings({ publicPage = false }: { publicPage?: boolean }
       const response = await fetch("/api/account", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ confirmation }) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Could not delete your account. Please try again.");
-      try { localStorage.removeItem(storageKey); } catch {}
+      try { localStorage.removeItem("anteract-demo-v1"); } catch {}
       await createClient().auth.signOut({ scope: "local" });
       window.location.assign("/login");
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not delete your account. Please try again."); setBusy(false); }
@@ -83,10 +81,8 @@ export function AccountSettings({ publicPage = false }: { publicPage?: boolean }
       {storageNotice && <p className="small-note" role="status">{storageNotice}</p>}
       <div className="settings-actions">
         <Link href="/profile" onClick={() => setOpen(false)}>Profile <span aria-hidden="true">↗</span></Link>
-        {guestModeEnabled ? <p className="small-note">You’re exploring without an account. Account actions become available when signed in.</p> : publicPage ? <Link href="/login">Log in <span aria-hidden="true">↗</span></Link> : <>
           <button disabled={busy} onClick={logout}>{busy ? "Please wait…" : "Log out"}<span aria-hidden="true">↗</span></button>
           <button className="settings-danger" disabled={busy} onClick={() => { setError(""); setConfirmation(""); dialog.current?.showModal(); }}>Delete account <span aria-hidden="true">×</span></button>
-        </>}
       </div>
       {error && !dialog.current?.open && <p className="field-error" role="alert">{error}</p>}
     </section>}

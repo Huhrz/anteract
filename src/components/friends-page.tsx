@@ -2,13 +2,9 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
-import { guestModeEnabled } from "@/lib/guest-mode";
-import { guestPeople } from "@/lib/guest-people";
-import { guestUserId } from "@/lib/guest-state";
-import { useGuest } from "./guest-provider";
 import { createClient } from "@/lib/supabase/client";
 import { profilePhotoBucket } from "@/lib/profile";
-import { activeFriendship, emptyPeopleFilters, filterPeople, splitFriendships, type FriendProfile, type Friendship, type PeopleFilters } from "@/lib/friend-discovery";
+import { activeFriendship, emptyPeopleFilters, splitFriendships, type FriendProfile, type Friendship, type PeopleFilters } from "@/lib/friend-discovery";
 import { StudentConnectionCard } from "./student-connection-card";
 
 const tabs = [{ id: "my-friends", label: "My Friends" }, { id: "requests", label: "Requests" }, { id: "find-students", label: "Find People" }] as const;
@@ -38,7 +34,6 @@ function ConnectionEmpty({ title, children, action }: { title: string; children?
 }
 
 export default function FriendsPage() {
-  const guest = useGuest();
   const [tab, setTab] = useState<Tab>("my-friends");
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const feedback = useRef<HTMLParagraphElement>(null);
@@ -64,11 +59,10 @@ export default function FriendsPage() {
   const [error, setError] = useState("");
   const [loadError, setLoadError] = useState("");
   const [notice, setNotice] = useState("");
-  const requests = guestModeEnabled ? guest.state.requests : databaseRequests;
-  const interests = guestModeEnabled ? guest.state.profile.interests : ownInterests;
+  const requests = databaseRequests;
+  const interests = ownInterests;
 
   const refresh = useCallback(async () => {
-    if (guestModeEnabled) return;
     const sequence = ++loadSequence.current;
     setRefreshing(true);
     try {
@@ -107,17 +101,12 @@ export default function FriendsPage() {
     return () => window.removeEventListener("hashchange", syncTab);
   }, []);
   useEffect(() => {
-    if (guestModeEnabled) {
-      if (!guest.ready) return;
-      setUserId(guestUserId); setProfiles(Object.fromEntries(guestPeople.map(person => [person.id, person])));
-      setLoading(false); setReady(true); return;
-    }
     void refresh();
     const onFocus = () => { if (!document.hidden && !actionInFlight.current) void refresh(); };
     window.addEventListener("focus", onFocus);
     const timer = window.setInterval(onFocus, 60_000);
     return () => { ++loadSequence.current; ++searchSequence.current; window.removeEventListener("focus", onFocus); window.clearInterval(timer); };
-  }, [refresh, guest.ready]);
+  }, [refresh]);
   useEffect(() => { if (notice) feedback.current?.focus({ preventScroll: true }); }, [notice]);
 
   function selectTab(next: Tab, focus = false) {
@@ -145,18 +134,14 @@ export default function FriendsPage() {
     setAppliedFilters(selection);
     setSearching(true);
     try {
-      let found: FriendProfile[];
-      if (guestModeEnabled) found = filterPeople(guestPeople.filter(person => person.id !== userId && person.display_name.toLowerCase().includes(term.toLowerCase())), selection, interests).slice(0, 30);
-      else {
-        let request = createClient().from("profiles").select(profileColumns).neq("id", userId);
-        if (term) request = request.ilike("display_name", `%${term}%`);
-        if (selection.major) request = request.eq("major", selection.major);
-        if (selection.year) request = request.eq("class_year", selection.year);
-        if (selection.sharedOnly) request = request.overlaps("interests", interests);
-        const { data, error: queryError } = await request.order("display_name").limit(30);
-        if (queryError) throw queryError;
-        found = await withPhotos(data ?? []);
-      }
+      let request = createClient().from("profiles").select(profileColumns).neq("id", userId);
+      if (term) request = request.ilike("display_name", `%${term}%`);
+      if (selection.major) request = request.eq("major", selection.major);
+      if (selection.year) request = request.eq("class_year", selection.year);
+      if (selection.sharedOnly) request = request.overlaps("interests", interests);
+      const { data, error: queryError } = await request.order("display_name").limit(30);
+      if (queryError) throw queryError;
+      const found = await withPhotos(data ?? []);
       if (sequence === searchSequence.current) setResults(found);
     } catch (searchFailure) {
       if (sequence === searchSequence.current) setSearchError(message(searchFailure));
@@ -168,25 +153,20 @@ export default function FriendsPage() {
     actionInFlight.current = true; ++loadSequence.current;
     setRefreshing(false); setBusyId(profile.id); setError(""); setNotice("");
     try {
-      if (guestModeEnabled) {
-        if (request) guest.act({ type: "respond", requestId: request.id, accept: !!accept });
-        else guest.act({ type: "invite", request: { id: crypto.randomUUID(), sender_id: userId, recipient_id: profile.id, status: "pending", created_at: new Date().toISOString() } });
-      } else {
-        const supabase = createClient();
-        const response = request
-          ? await supabase.from("friend_requests").update({ status: accept ? "accepted" : "rejected" }).eq("id", request.id).eq("recipient_id", userId).eq("status", "pending").select(requestColumns).maybeSingle()
-          : await supabase.from("friend_requests").insert({ sender_id: userId, recipient_id: profile.id }).select(requestColumns).single();
-        if (response.error) throw response.error;
-        if (!response.data) throw new Error("This request has already changed. Refresh your connections and try again.");
-        const saved = response.data as Friendship;
-        // Confirmed writes update every tab immediately, independent of a follow-up fetch.
-        setRequests(current => [saved, ...current.filter(item => item.id !== saved.id)]);
-        setProfiles(current => ({ ...current, [profile.id]: profile }));
-      }
+      const supabase = createClient();
+      const response = request
+        ? await supabase.from("friend_requests").update({ status: accept ? "accepted" : "rejected" }).eq("id", request.id).eq("recipient_id", userId).eq("status", "pending").select(requestColumns).maybeSingle()
+        : await supabase.from("friend_requests").insert({ sender_id: userId, recipient_id: profile.id }).select(requestColumns).single();
+      if (response.error) throw response.error;
+      if (!response.data) throw new Error("This request has already changed. Refresh your connections and try again.");
+      const saved = response.data as Friendship;
+      // Confirmed writes update every tab immediately, independent of a follow-up fetch.
+      setRequests(current => [saved, ...current.filter(item => item.id !== saved.id)]);
+      setProfiles(current => ({ ...current, [profile.id]: profile }));
       setNotice(request ? accept ? `You and ${profile.display_name} are now friends.` : `Request from ${profile.display_name} declined.` : `Friend request sent to ${profile.display_name}.`);
     } catch (failure) {
       setError(message(failure));
-      if (!guestModeEnabled) await refresh();
+      await refresh();
     } finally { actionInFlight.current = false; setBusyId(""); }
   }
 
@@ -199,7 +179,7 @@ export default function FriendsPage() {
   function actions(profile: FriendProfile) {
     const relationship = activeFriendship(requests, userId, profile.id);
     const busy = busyId === profile.id;
-    if (relationship?.status === "accepted") return <><span className="connection-status connected">✓ Friends</span>{guestModeEnabled && guestPeople.some(person => person.id === profile.id) && <Link className="secondary" href={`/chat/${profile.id}`}>Message <span className="sr-only">{profile.display_name} (demo)</span><span aria-hidden="true">↗</span></Link>}</>;
+    if (relationship?.status === "accepted") return <><span className="connection-status connected">✓ Friends</span><Link className="secondary" href={`/chat/${profile.id}`}>Message <span className="sr-only">{profile.display_name}</span><span aria-hidden="true">↗</span></Link></>;
     if (relationship?.status === "pending") return relationship.recipient_id === userId
       ? <><button className="primary" disabled={!!busyId} onClick={() => void act(profile, relationship, true)}>{busy ? "Updating…" : "Accept"}</button><button className="secondary" disabled={!!busyId} onClick={() => void act(profile, relationship, false)}>Decline</button></>
       : <span className="connection-status pending"><span aria-hidden="true">◷</span> Pending</span>;
@@ -223,7 +203,6 @@ export default function FriendsPage() {
       <section id="my-friends" role="tabpanel" aria-labelledby="tab-my-friends" tabIndex={0} hidden={tab !== "my-friends"} className="friends-tab-panel">
         <div className="connections-section-heading"><div><h2>Friends <span>{friends.length}</span></h2></div></div>
         {friends.length ? requestCards(friends) : <ConnectionEmpty title="Your circle starts with a hello." action={<button className="primary" onClick={() => selectTab("find-students", true)}>Find People <span aria-hidden="true">↗</span></button>}></ConnectionEmpty>}
-        {guestModeEnabled && friends.length > 0 && <p className="connections-footnote">Demo messages stay in this browser.</p>}
       </section>
       <section id="requests" role="tabpanel" aria-labelledby="tab-requests" tabIndex={0} hidden={tab !== "requests"} className="friends-tab-panel">
         <div className="connections-section-heading"><div><h2>Received <span>{received.length}</span></h2></div></div>

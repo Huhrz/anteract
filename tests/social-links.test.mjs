@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { parseSocialLinks } from '../src/lib/social-links.ts';
-import { readGuestState, guestReducer, guestUserId } from '../src/lib/guest-state.ts';
 
 test('social links normalize domains, preserve paths and ignore optional empty rows',()=>{
  assert.deepEqual(parseSocialLinks([{platform:'Instagram',url:' Instagram.com/Anteract '},{platform:'LinkedIn',url:'https://www.linkedin.com/in/student/'},{platform:'Discord',url:''}]),{ok:true,links:[{platform:'Instagram',url:'https://instagram.com/Anteract'},{platform:'LinkedIn',url:'https://www.linkedin.com/in/student/'}]});
@@ -21,15 +20,4 @@ test('social links enforce count, duplicates and URL length while allowing remov
  assert.equal(parseSocialLinks([{platform:'Instagram',url:'https://example.com'},{platform:'Website',url:'EXAMPLE.com/'}]).ok,false);
  assert.equal(parseSocialLinks([{platform:'Website',url:'https://example.com/'+ 'a'.repeat(500)}]).ok,false);
  assert.equal(parseSocialLinks(Array.from({length:5},(_,i)=>({platform:'Website',url:`https://example.com/${i}`}))).ok,true);
-});
-
-test('guest profile edits preserve social links through refresh and clear them without losing other data',()=>{
- const state={version:1,events:[],requests:[],profile:{id:guestUserId,display_name:'Guest',major:'Informatics',class_year:'Third year',interests:['Coffee'],avatar_path:null,photoUrl:''}};
- const links=[{platform:'Instagram',url:'https://instagram.com/example'}];
- const saved=guestReducer(state,{type:'profile',profile:{...state.profile,social_links:links}});
- assert.deepEqual(readGuestState(JSON.stringify(saved),state).profile.social_links,links);
- const cleared=guestReducer(saved,{type:'profile',profile:{...saved.profile,social_links:[]}});
- assert.deepEqual(cleared.profile.interests,['Coffee']);
- assert.deepEqual(cleared.profile.social_links,[]);
- assert.equal(readGuestState(JSON.stringify(state),state).profile.social_links,undefined);
 });

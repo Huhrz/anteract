@@ -1,13 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { guestModeEnabled } from "@/lib/guest-mode";
 import { isUciEmail } from "@/lib/supabase/access";
 
 export async function proxy(request: NextRequest) {
-  if (guestModeEnabled) {
-    return request.nextUrl.pathname === "/login" || request.nextUrl.pathname.startsWith("/auth/")
-      ? NextResponse.redirect(new URL("/", request.url)) : NextResponse.next({ request });
-  }
   // Supabase falls back to Site URL when the requested redirect isn't allowlisted.
   // Preserve the authorization code so recovery still reaches the password form.
   if ((request.nextUrl.pathname === "/" || request.nextUrl.pathname === "/login") && request.nextUrl.searchParams.has("code")) {

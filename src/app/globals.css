@@ -1,9 +1,6 @@
 :root { --navy: #153e63; --gold: #f6c849; --ink: #1b3146; --muted: #617183; --line: #dde4ea; }
 
-/* Official UCI map demo and event location links. */
-.location-demo-page { max-width: 1096px !important; }
-.map-demo-picker small { display: block; margin-top: 7px; font-size: 11px; color: var(--muted); line-height: 1.5; }
-.location-demo-layout { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 28px; align-items: start; }
+/* Official UCI map picker and event location links. */
 .location-picker { min-width: 0; }
 .location-picker-heading { display: flex; gap: 12px; align-items: flex-start; }
 .location-picker-heading .step-number { padding-top: 6px; }
@@ -49,7 +46,6 @@
 .meeting-instructions-label { margin-top: 24px; }
 .location-event-preview textarea { display: block; width: 100%; resize: vertical; line-height: 1.8; }
 @media (max-width: 850px) {
-  .location-demo-layout { grid-template-columns: 1fr; gap: 32px; }
   .location-event-preview { position: static; }
 }
 @media (max-width: 600px) {
@@ -73,22 +69,11 @@
 .campus-map-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 16px 22px; border-top: 1px solid var(--line); }
 .campus-map-footer > span { font-size: 11px; color: var(--muted); }
 .campus-map-footer .text-link { font-size: 12px; }
-.map-demo-page { max-width: 850px; margin: 0 auto; }
-.map-demo-picker { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 8px 0 28px; }
-.map-demo-picker button { padding: 17px; border: 1px solid var(--line); border-radius: 11px; text-align: left; background: var(--surface); color: var(--ink); }
-.map-demo-picker button[aria-pressed="true"] { background: #edf3f8; border-color: #6587a3; box-shadow: inset 0 0 0 1px #6587a3; }
-.map-demo-picker span { display: block; margin-bottom: 8px; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
-.map-demo-picker strong { display: block; font-size: 13px; line-height: 1.5; }
-.map-demo-event h2 { font-size: 25px; margin: 0 0 12px; }
-.map-demo-event .body-copy { margin-bottom: 0; }
 @media (max-width: 600px) {
   .campus-map-heading { padding: 18px 18px 0; flex-wrap: wrap; gap: 12px; }
   .campus-map-note { margin: 12px 18px 18px; }
   .campus-map-frame { height: 400px; }
   .campus-map-footer { padding: 16px 18px; }
-  .map-demo-picker { grid-template-columns: 1fr; gap: 8px; }
-  .map-demo-picker button { padding: 12px 16px; }
-  .map-demo-picker span { margin-bottom: 4px; }
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -683,10 +668,6 @@ textarea:focus-visible, select:focus-visible { outline: 3px solid #3d82af; outli
   .tag-chip { min-height: 44px; }
 }
 
-.guest-badge { padding: 9px 13px; border-radius: 20px; color: #153e63; background: #f9efcd; font-size: 12px; font-weight: 700; white-space: nowrap; }
-.guest-banner { width: calc(100% - 64px); max-width: 1256px; margin: 0 auto 16px; padding: 13px 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 20px; color: #234b6b; background: #eaf1f6; border: 1px solid #d4e1ea; border-radius: 10px; font-size: 12px; line-height: 1.7; }
-.guest-banner button { background: transparent; border: 0; color: #153e63; font-size: 12px; font-weight: 600; padding: 7px 0; min-height: 36px; text-decoration: underline; text-underline-offset: 3px; }
-@media (max-width: 480px) { .guest-banner { width: calc(100% - 40px); padding: 12px 15px; } }
 
 /* Optional social accounts on student profiles. */
 .social-editor { margin: 12px 0 6px; padding: 18px 0 0; border: 0; border-top: 1px solid var(--line); min-width: 0; }
@@ -744,7 +725,7 @@ body { background: var(--page); }
 .delete-account-dialog::backdrop { background: #071423aa; }
 :root[data-theme="dark"] :is(.primary, .nav-link.active, .nav-count, .tag-chip.selected, .join) { background: #275c85; color: #fff; border-color: #467ba2; }
 :root[data-theme="dark"] .primary:hover { background: #326d99; }
-:root[data-theme="dark"] :is(.hero, .agenda-stats, .chat-sidebar, .conversation.active, .conversation:hover, .you-row, .interest-tags span, .attendance-note, .location-apply, .location-no-results, .guest-banner, .tag-chip, .event-tags a, .profile-socials a, .social-editor-row, .social-platform-mark, .nav-link:hover) { background: var(--soft); color: var(--ink); border-color: var(--line); }
+:root[data-theme="dark"] :is(.hero, .agenda-stats, .chat-sidebar, .conversation.active, .conversation:hover, .you-row, .interest-tags span, .attendance-note, .location-apply, .location-no-results, .tag-chip, .event-tags a, .profile-socials a, .social-editor-row, .social-platform-mark, .nav-link:hover) { background: var(--soft); color: var(--ink); border-color: var(--line); }
 :root[data-theme="dark"] :is(.intro, .description, .nav-link, .when-filter, .spots-filter, .hero-decoration > span, .tag-filters legend span, .tag-editor > label span, .social-link-remove) { color: var(--muted); }
 :root[data-theme="dark"] :is(.field-error, .friend-error, .location-error, .safety-danger) { color: var(--danger); }
 :root[data-theme="dark"] :is(.storage-warning, .preview-notice, .chat-demo-note) { background: #433b24; color: #f3db9b; }
@@ -760,8 +741,8 @@ body { background: var(--page); }
 :root[data-theme="dark"] :is(input, textarea, select) { background-color: var(--surface); color: var(--ink); }
 :root[data-theme="dark"] :is(.welcome-story, .welcome-story.story-editorial, .welcome-story.story-social, .welcome-entry) { background: var(--page); color: var(--ink); border-color: var(--line); }
 :root[data-theme="dark"] :is(.social-headline, .editorial-heading h1, .entry-content h2, .welcome-brand, .welcome-form label) { color: var(--ink); }
-:root[data-theme="dark"] :is(.social-headline span, .editorial-heading h1 span, .guest-banner button) { color: var(--navy); }
-:root[data-theme="dark"] :is(.lp-selected, .lp-list li.active, .map-demo-picker button[aria-pressed="true"]) { background: var(--soft); color: var(--ink); }
+:root[data-theme="dark"] :is(.social-headline span, .editorial-heading h1 span) { color: var(--navy); }
+:root[data-theme="dark"] :is(.lp-selected, .lp-list li.active) { background: var(--soft); color: var(--ink); }
 :root[data-theme="dark"] .lp-selected small { color: #9ed9b0; }
 
 /* Fixed navigation has a stable initial gutter; hiding never shifts content. */
@@ -1157,9 +1138,14 @@ html { scroll-padding-top: 120px; }
 @media (prefers-reduced-motion: reduce) {
   .messenger *, .messenger *::before, .messenger *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
 }
-/* Account for the existing guest banner without pushing the composer offscreen. */
-body:has(.guest-banner) .messenger.chat-layout { height: min(780px, calc(100dvh - 244px)); }
 .messenger.chat-layout .conversation.active { background: color-mix(in srgb, var(--gold) 15%, var(--surface)); border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
-@media (max-width: 700px) {
-  body:has(.guest-banner) .messenger.chat-layout { height: calc(100dvh - 284px); }
-}
+.messenger .avatar { overflow: hidden; }
+.messenger .avatar img { width: 100%; height: 100%; object-fit: cover; }
+.messaging-error { padding: 12px 18px; color: var(--danger); font-size: 12px; line-height: 1.7; }
+.messaging-error p { margin: 0 0 6px; }
+.messaging-error .text-link { margin-left: 12px; }
+.messaging-send-error { color: var(--danger); font-size: 11px; line-height: 1.6; margin: 8px 4px; }
+.history-more { align-self: center; flex-shrink: 0; min-height: 36px; font-size: 11px; }
+
+.messenger-connection { display: flex; align-items: center; gap: 7px; }
+.messenger-connected-dot { flex: 0 0 7px; width: 7px; height: 7px; border-radius: 50%; background: #22a55b; }
