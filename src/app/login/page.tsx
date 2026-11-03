@@ -95,7 +95,6 @@ export default function Login() {
     <section className="welcome-entry" aria-labelledby="entry-title">
       <span className="uci-badge"><img src="/uci_logo.png" alt="UCI anteater mascot" width="76" height="41" /> EXCLUSIVELY UCI</span>
       <div className="entry-content">
-        <p className="entry-kicker">GOOD TO SEE YOU HERE</p>
         <h2 id="entry-title">{mode === "signup" ? "Your people are here." : mode === "reset" ? "Let’s get you back in." : "Hello, Anteater."}<span> {mode === "login" ? "✳" : ""}</span></h2>
         <p className="entry-description">{mode === "signup" ? "A shared campus is a pretty good place to start." : mode === "reset" ? "Start with your UCI email address." : "Your next connection is just a hello away."}</p>
         <form className="welcome-form" onSubmit={submit}>

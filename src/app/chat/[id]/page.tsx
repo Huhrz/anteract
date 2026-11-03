@@ -1,12 +1,10 @@
 import { notFound } from "next/navigation";
-import { people } from "@/lib/hangouts";
 import { ChatScreen } from "@/components/chat-screen";
 
-export function generateStaticParams() { return people.map((person) => ({ id: person.id })); }
-
+// Existing /chat/<profile-id> links continue to open a direct conversation.
+// Participant and accepted-friend authorization is enforced in Postgres.
 export default async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const person = people.find((item) => item.id === id);
-  if (!person) notFound();
-  return <ChatScreen person={person} />;
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) notFound();
+  return <ChatScreen key={id} recipientId={id} />;
 }

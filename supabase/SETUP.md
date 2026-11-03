@@ -38,7 +38,7 @@ The app uses Supabase Auth through supabase-js and SSR cookies. No ORM or databa
 
 ## Scope
 
-Authentication, profiles, events, and event memberships use Supabase when their migrations have been applied to the configured project. Chat, account reports/blocks, and attendance confirmation remain local demo features. Do not use local demo messaging for real student conversations. Before persisting chat or safety features, add migrations and Row Level Security policies, including conversation membership checks.
+Authentication, profiles, events, and event memberships use Supabase when their migrations have been applied to the configured project. Direct messaging uses Supabase after applying the Stage 2 migration described below. The retired sample-profile catalog and its browser-local messaging/report/block controls have been removed. Guest mode has been removed; all app data requires Supabase authentication.
 
 The signup hook restricts account creation. Protected app routes also check the current verified email so changing to another domain cannot grant app access. Future database policies must independently enforce that rule. UCI email ownership does not establish current enrollment.
 
@@ -54,4 +54,28 @@ Tags describe interests and do not enforce friends-only or club-only access. Exi
 
 ## Profile social links
 
-Before deploying the updated profile editor to a real backend, review and apply `migrations/202611010002_profile_social_links.sql` after the profiles migration. It adds a `social_links` JSONB array with an empty default, a five-link maximum, platform labels and HTTPS URL checks. Existing profile read/write policies continue to control access. The client normalizes and validates the same platform/link pairs before saving. Guest-mode changes stay in local browser storage and do not require this migration.
+Before deploying the updated profile editor to a real backend, review and apply `migrations/202611010002_profile_social_links.sql` after the profiles migration. It adds a `social_links` JSONB array with an empty default, a five-link maximum, platform labels and HTTPS URL checks. Existing profile read/write policies continue to control access. The client normalizes and validates the same platform/link pairs before saving.
+
+## Account settings and deletion
+
+Set `SUPABASE_SECRET_KEY` (or legacy `SUPABASE_SERVICE_ROLE_KEY`) in the server environment to enable `DELETE /api/account`. Never prefix this secret with `NEXT_PUBLIC_`. The route checks the same-origin request, explicit confirmation, and verified UCI session, and derives the target account from Supabase `getUser()`. It removes all files in the user's profile-photo folder, revokes refresh sessions, then hard-deletes the auth user. Existing foreign-key cascades remove their profile, friend requests, hosted events, and event memberships. Storage removal and auth deletion are separate operations; a later failure can leave the account without its photo and requires signing in again to retry. Existing access JWTs expire normally; deleting the user does not cryptographically invalidate them. The endpoint verifies the user with Auth on every request.
+
+The header settings include logout and Light/Dark/System appearance saved in this browser. Profile editing is available through My Profile in the main navigation. Validate permanent deletion using a disposable verified account with a photo and hosted event before deployment; never use a real student's account for testing.
+
+## Profile editor and optional bio
+
+Apply `supabase/migrations/20261103025457_profile_bio.sql` before deploying the redesigned profile editor. It adds an optional `bio` field (empty by default, at most 500 characters) without changing existing profile data, grants, or RLS policies. The migration uses a short lock timeout; if the table is busy and it rolls back, retry during a quieter period.
+
+Verify with `select bio from public.profiles limit 1;`. In `/profile`, edit the bio, save, reload, and check `/profiles/<user-id>`. Existing profile, photo, and social-link migrations are still required.
+
+## Persistent direct messaging (Stage 2)
+
+Review and apply `migrations/20261103050528_direct_messaging.sql` before deploying the updated Messages UI. See [MESSAGING.md](./MESSAGING.md) for schema/RLS details, exact migration and Realtime setup, isolated database tests, and the three-account staging verification procedure. Messaging now requires a verified UCI Supabase session and an accepted friendship; browser-local demo messages are not uploaded.
+
+## Message requests, blocks, and reports
+
+Apply `migrations/20261103054033_message_requests_and_profile_safety.sql` after direct messaging. It adds nonfriend message requests, recipient consent, bilateral messaging/friend-invitation blocks, and private persisted profile reports. Existing messages and conversations are preserved. See [REQUESTS_AND_SAFETY.md](./REQUESTS_AND_SAFETY.md) for behavior, security, setup, and administrator report review.
+
+## Unread message counts
+
+Apply `migrations/20261103060311_direct_message_unread_counts.sql` after message requests/profile safety. It adds private persistent read positions, unread counts on conversations and folders, and a combined navigation badge. See [UNREAD_COUNTS.md](./UNREAD_COUNTS.md) for exact manual setup, privacy rules, and verification.

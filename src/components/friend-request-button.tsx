@@ -1,9 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { guestModeEnabled } from "@/lib/guest-mode";
-import { guestUserId } from "@/lib/guest-state";
-import { useGuest } from "./guest-provider";
 import { createClient } from "@/lib/supabase/client";
 
 type Request = { id: string; sender_id: string; recipient_id: string; status: "pending" | "accepted" | "rejected" };
@@ -14,7 +11,6 @@ function message(error: unknown) {
 }
 
 export function FriendRequestButton({ profileId, name }: { profileId: string; name: string }) {
-  const guest = useGuest();
   const [userId, setUserId] = useState("");
   const [request, setRequest] = useState<Request | null>(null);
   const [loading, setLoading] = useState(true);
@@ -24,11 +20,6 @@ export function FriendRequestButton({ profileId, name }: { profileId: string; na
   const [notice, setNotice] = useState("");
 
   async function load() {
-    if (guestModeEnabled) {
-      setUserId(guestUserId);
-      setRequest(guest.state.requests.find((item) => item.status !== "rejected" && [item.sender_id, item.recipient_id].includes(profileId)) ?? null);
-      setStatusLoaded(true); return;
-    }
     const supabase = createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError) throw authError;
@@ -45,23 +36,17 @@ export function FriendRequestButton({ profileId, name }: { profileId: string; na
   }
 
   useEffect(() => {
-    if (guestModeEnabled && !guest.ready) return;
     let active = true;
     void load().catch((loadError: unknown) => { if (active) setError(message(loadError)); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [profileId, guest.ready, guest.state.requests]);
+  }, [profileId]);
 
   async function act(action: "send" | "accept" | "decline") {
     setBusy(true);
     setError("");
     setNotice("");
     try {
-      if (guestModeEnabled) {
-        if (action === "send") guest.act({ type: "invite", request: { id: crypto.randomUUID(), sender_id: guestUserId, recipient_id: profileId, status: "pending", created_at: new Date().toISOString() } });
-        else if (request) guest.act({ type: "respond", requestId: request.id, accept: action === "accept" });
-        setNotice("Friend request updated in this browser demo."); return;
-      }
       const supabase = createClient();
       if (action === "send") {
         const { error: insertError } = await supabase.from("friend_requests").insert({ sender_id: userId, recipient_id: profileId });
@@ -92,7 +77,7 @@ export function FriendRequestButton({ profileId, name }: { profileId: string; na
   return <div className="friend-actions">
     {request?.status === "accepted" ? <span className="friend-state">✓ Friends</span>
       : incoming ? <><button className="primary" type="button" disabled={busy} onClick={() => void act("accept")}>Accept request</button><button className="quiet-button" type="button" disabled={busy} onClick={() => void act("decline")}>Decline</button></>
-      : request?.status === "pending" ? <span className="friend-state">Request sent</span>
+      : request?.status === "pending" ? <span className="friend-request-sent"><span className="friend-request-sent-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m21 3-7 18-4-7-7-4 18-7Z" /><path d="m10 14 6-6" /></svg></span>Request sent<svg className="friend-request-sent-check" width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m4 10 4 4 8-8" /></svg></span>
       : <button className="primary" type="button" disabled={busy} onClick={() => void act("send")}>{busy ? "Sending…" : "Add friend"}</button>}
     {error && <span className="friend-error" role="alert">{error}</span>}
     {notice && <span className="small-note" role="status">{notice}</span>}

@@ -32,19 +32,14 @@ npx --yes pnpm@11.25.0 build
 | My Events | `/my-events` | View events you joined and events you host. |
 | Friends | `/friends` | Search students, send requests, and accept or decline invitations. |
 | My Profile | `/profile` | Edit your profile, photo, interests, and social media links. |
-| Person's profile | `/profiles/maya` | View their interests and press Chat. All profiles are fictional demo data. |
-| Chat | `/chat/maya` | Type and send a local demo message. Switch contacts to view separate conversations. |
+| Student profile | `/profiles/<user-id>` | View a real student profile and message an accepted friend. |
+| Messages | `/chat` | View persistent conversations and message accepted friends in real time. |
 
-In backend mode, events and memberships are stored in Supabase and shared across signed-in UCI accounts. Database policies restrict event creation and membership to the authenticated UCI user; unique membership and event capacity are enforced in the database. Cancelling an event removes its memberships. Chat and report/block controls remain local demo behavior. Existing sample-profile content and time labels are not database records.
+In backend mode, events and memberships are stored in Supabase and shared across signed-in UCI accounts. Database policies restrict event creation and membership to the authenticated UCI user; unique membership and event capacity are enforced in the database. Cancelling an event removes its memberships. Messaging is stored in Supabase with participant-only access and accepted-friend sending rules.
 
-## Campus map demo
+## Campus maps
 
-Open `/map-demo` to choose a location for one of three fictional sample events. No Supabase configuration or login is needed. This page demonstrates the location field. The reusable location picker is also available in `/create-demo`; the backend event form currently uses a location text field. Backend event pages require authentication unless the isolated guest demo is enabled.
-
-1. Enter a campus location name and press **Search UCI map**. The embedded official map displays real search results.
-2. For a quick match, press **Preview pin**, check the map, then **Use this location**. Quick matches are a small verified demo catalog (Science Library, Langson Library, ARC, Student Center, Aldrich Park, and Watson Bridge), not the live UCI index.
-3. For any other result, open the place in the official map, choose that location's Share icon, and copy its location link. Expand **Choose a different place from the official map**, enter the display name and link, preview the pin, then use it. A global map/search share link is not a location link.
-4. The event preview's name and map link update together. Changing to a different marker clears the old meeting instructions. Each sample event keeps its own draft while switching events; refreshing resets these drafts. Nothing is published or saved to the backend.
+Create or edit a real event to use UCI campus location search, preview a pin, or import an official UCI location share link. The standalone demo page has been removed; the shared location picker and maps remain available in event flows.
 
 Event cards, event details, and My Events now link their location text to the official UCI map. Details also embed the map below the meeting instructions. The full-map link stays available if embedding is blocked or slow. No map API key or SDK is needed.
 
@@ -52,7 +47,7 @@ Event cards, event details, and My Events now link their location text to the of
 - Aldrich Park opens the park landmark; the gathering point remains the entrance near Langson Library.
 - UTC opens Watson Bridge, a nearby campus landmark; the gathering point remains the UTC end of the bridge, not an arbitrary restaurant.
 
-`src/components/campus-location-picker.tsx` is the reusable selection field. It returns a `{ label, markerId }` place to the demo page. A selected event can store it as optional `campusMapPlace`; existing preset events use `campusLocationId`. Both render through the same map and event-location components. Link validation restricts imports to a single marker on UCI's official map and normalizes the URL. It cannot verify that the supplied name matches a real marker: the person must review the official preview before choosing.
+`src/components/campus-location-picker.tsx` is the reusable selection field. It returns a `{ label, markerId }` place to the event form. A selected event can store it as optional `campusMapPlace`; existing preset events use `campusLocationId`. Both render through the same map and event-location components. Link validation restricts imports to a single marker on UCI's official map and normalizes the URL. It cannot verify that the supplied name matches a real marker: the person must review the official preview before choosing.
 
 Search and marker URLs are documented by Concept3D: https://help.concept3d.com/hc/en-us/articles/115004127673-Interactive-Map-Query-Strings . Directly fetching search results needs separate API access; this demo does not extract the map's internal key, proxy private APIs, or read cross-origin iframe state. The real search runs within the official iframe; selections outside the quick catalog use the share-link handoff. These are landmark links, not live locations or route calculations.
 
@@ -89,22 +84,16 @@ For production, authenticate the acting account on the server, store reports in 
 
 ## Event discovery
 
-Open `/events-demo` without signing in to try filtering four fictional events. This page does not publish events or join anyone to real plans. `/create-demo` now previews interest tags with the same validation as the real event form.
-
 The real `/events` browser supports category, keyword, multiple interest tags (all must match), Today / Next 7 days / Upcoming, and open spots. Browse shows only future starts and sorts by start time. Tags on cards and event details link to a filtered browser. New events accept up to five tags of 24 characters; spaces become hyphens and duplicates are removed. Old events with no tags still work.
 
-Apply `supabase/migrations/202611010001_event_tags.sql` before deploying the updated real creation form. Run `node --test tests/*.test.mjs` for the authentication, map, discovery, guest-mode, and social-link rules. The guest preview does not apply migrations or write to Supabase.
+Apply `supabase/migrations/202611010001_event_tags.sql` before deploying the updated real creation form. Run `node --test tests/*.test.mjs` for the authentication, map, discovery, messaging, and social-link rules.
 
-## Login-free guest demo
+## Authentication
 
-For a local demo with no Supabase configuration, copy `guest-demo.env` to `.env.local`, then build and start the app. Open `/` to use the normal home, discovery, event creation, agenda, friends, profiles and local chat. Login URLs redirect to the home page while guest mode is enabled.
-
-Guest events, memberships, profile and friend requests stay in this browser under `anteract-guest-v1`; chat retains its separate local-demo storage. The banner identifies guest mode and offers Reset sample data. Sample invitations do not contact other people. If browser storage is unavailable, a notice explains that changes last until refresh.
-
-`NEXT_PUBLIC_GUEST_MODE` defaults to false. Both Supabase variables must be absent for guest mode to activate. Setting either Supabase variable disables the guest bypass, so a configured backend continues to require UCI authentication. Do not copy the placeholder Supabase values from `.env.example` into a guest-only setup. This mode never supplies a real user session or writes to Supabase.
+All app pages require a verified UCI Supabase account. Configure the variables in `.env.example` and follow `supabase/SETUP.md`. Guest access and browser-local demo data have been removed.
 
 ## Profile social media
 
 The profile editor supports up to five optional social media links, with platform selectors, Add and Remove controls. Missing schemes normalize to HTTPS. Links appear on the student's profile and open in a new tab. Empty rows are ignored; duplicate links, non-HTTPS protocols and URLs containing credentials are rejected. Supported labels are Instagram, LinkedIn, Discord, X, TikTok, GitHub and Website.
 
-Guest-mode links persist with the rest of the browser-local profile. Existing guest saves without social links remain valid. For real Supabase profiles, review and apply `supabase/migrations/202611010002_profile_social_links.sql` before deploying the updated profile form. No remote migration is run by this source package.
+For Supabase profiles, review and apply `supabase/migrations/202611010002_profile_social_links.sql` before deploying the updated profile form. No remote migration is run by this source package.

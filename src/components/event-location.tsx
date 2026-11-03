@@ -1,7 +1,7 @@
 import { getCampusMap } from "@/lib/campus-map";
 import type { Hangout } from "@/lib/hangouts";
 
-export function EventLocation({ event }: { event: Hangout }) {
+export function EventLocation({ event }: { event: Pick<Hangout, "location" | "campusLocationId" | "campusMapPlace"> }) {
   const { url, location } = getCampusMap(event.campusLocationId, event.campusMapPlace, event.location);
   return (
     <a
