@@ -7,11 +7,11 @@ const source=stripTypeScriptTypes(readFileSync(new URL('../src/components/use-di
 const row=(id='message-1')=>({id,conversation_id:'thread-a',sender_id:'me',content:'Hello',created_at:'2026-11-03T00:00:00.123456+00:00'});
 function harness({failInsert=false}={}){
   const slots=[],effects=[],channels=[],removed=[],inserts=[];
-  let index=0,hook,output,authCallback,sendFails=failInsert,history=[row()],since=[],list=[{id:'thread-a',recipient_id:'friend',display_name:'A Friend',avatar_path:null,created_at:row().created_at,last_created_at:row().created_at,last_content:'Hello',last_sender_id:'me'}];
+  let index=0,hook,output,authCallback,sendFails=failInsert,history=[row()],since=[],list=[{id:'thread-a',recipient_id:'friend',display_name:'A Friend',avatar_path:null,created_at:row().created_at,last_created_at:row().created_at,last_content:'Hello',last_sender_id:'me',status:'accepted',initiated_by:'me',messaging_blocked:false}];
   const window=new EventTarget();
   const db={auth:{getUser:async()=>({data:{user:{id:'me',email:'me@uci.edu',email_confirmed_at:'yes'}}}),onAuthStateChange:fn=>{authCallback=fn;return {data:{subscription:{unsubscribe(){}}}};}},
     rpc(name){const result={data:name==='start_direct_conversation'?'thread-a':name==='list_direct_conversations'?list:name==='direct_message_history'?history:since,error:null};const chain={then(resolve,reject){return Promise.resolve(result).then(resolve,reject);},select(){return chain;},order(){return chain;},range(){return chain;}};return chain;},
-    from(){return {insert(value){inserts.push(value);return {select(){return {single:async()=>sendFails?{error:new Error('Network failure')}:{data:{...row(value.id),content:value.content}}};}};}};},
+    from(table){if(table==='conversations')return {update(value){const chain={eq(){return chain;},select(){return chain;},maybeSingle:async()=>({data:{id:'thread-a'},error:null})};return chain;}};return {insert(value){inserts.push(value);return {select(){return {single:async()=>sendFails?{error:new Error('Network failure')}:{data:{...row(value.id),content:value.content}}};}};}};},
     channel(name){const channel={name,handlers:[],on(_kind,filter,callback){channel.handlers.push({filter,callback});return channel;},subscribe(callback){channel.status=callback;channels.push(channel);return channel;}};return channel;},
     removeChannel(channel){removed.push(channel);return Promise.resolve();},storage:{from(){return {createSignedUrl:async()=>({data:null})};}}};
   const react={useState(initial){const slot=index++;if(!(slot in slots))slots[slot]=initial;return [slots[slot],value=>{slots[slot]=typeof value==='function'?value(slots[slot]):value;}];},useRef(initial){const slot=index++;if(!(slot in slots))slots[slot]={current:initial};return slots[slot];},useEffect(fn,deps){const slot=index++;const old=slots[slot];if(!old||deps.some((value,i)=>value!==old.deps[i])){old?.cleanup?.();slots[slot]={deps};effects.push(()=>{slots[slot].cleanup=fn();});}}};
@@ -19,7 +19,7 @@ function harness({failInsert=false}={}){
   function render(recipient='friend'){index=0;output=hook(recipient);while(effects.length)effects.shift()();return output;}
   async function settle(){for(let i=0;i<3;i++)await new Promise(resolve=>setImmediate(resolve));return render();}
   render();
-  return {render,settle,channels,removed,inserts,window,get output(){return output;},setFail(value){sendFails=value;},setHistory(value){history=value;},setSince(value){since=value;},auth:()=>authCallback('SIGNED_OUT',null),cleanup(){for(const slot of slots)slot?.cleanup?.();}};
+  return {render,settle,channels,removed,inserts,window,get output(){return output;},setFail(value){sendFails=value;},setList(value){list=value;},setConsent(status){list=list.map(item=>({...item,status,initiated_by:'friend'}));},setHistory(value){history=value;},setSince(value){since=value;},auth:()=>authCallback('SIGNED_OUT',null),cleanup(){for(const slot of slots)slot?.cleanup?.();}};
 }
 test('active subscription merges Realtime and confirmed sends by ID and cleans up on unmount',async()=>{
   const h=harness();try{let state=await h.settle();assert.equal(state.active.id,'thread-a');assert.equal(h.channels.length,2);
@@ -39,4 +39,11 @@ test('reconnection catches up missed messages and reports channel errors',async(
 
 test('switching recipients removes old channels before creating new subscriptions',async()=>{
   const h=harness();try{await h.settle();h.render('another-friend');assert.equal(h.removed.length,2);}finally{h.cleanup();}
+});
+
+test('accepting a message request updates its local inbox state immediately',async()=>{
+ const h=harness();try{h.setConsent('pending');await h.settle();assert.equal(h.output.active.status,'pending');await h.output.respond(true);assert.equal(h.render().active.status,'accepted');assert.equal(h.render().conversations[0].status,'accepted');}finally{h.cleanup();}
+});
+test('declining a request removes it from pending without accepting it',async()=>{
+ const h=harness();try{h.setConsent('pending');await h.settle();assert.equal(h.output.active.status,'pending');await h.output.respond(false);assert.equal(h.render().active.status,'declined');assert.equal(h.render().conversations[0].status,'declined');}finally{h.cleanup();}
 });

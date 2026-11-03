@@ -116,3 +116,7 @@ Applied `20261103050528_direct_messaging.sql` through the authenticated Supabase
 Verified all three messaging tables have RLS enabled and conversations/messages are in the supabase_realtime publication. Reloaded the existing authenticated app at `/chat`: the setup error disappeared and the status became Connected. No messages were sent and no existing user records were changed. Two-account delivery tests remain a separate staging validation.
 
 This project had no supabase_migrations tables visible during inspection; the SQL Editor application did not initialize or rewrite CLI migration history. Reconcile the existing Dashboard-applied migrations before a future CLI db push; do not rerun the table-creation migrations.
+
+## Message requests and safety update
+
+The accepted-friends-only sending rule above describes the initial Stage 2 migration. Apply the later `20261103054033_message_requests_and_profile_safety.sql` migration for the current behavior: friends enter the main inbox directly, nonfriends can send one introductory request, and accepted requests allow chatting independently of friendship. Bilateral blocks and private persisted reports are now supported. See [REQUESTS_AND_SAFETY.md](./REQUESTS_AND_SAFETY.md).

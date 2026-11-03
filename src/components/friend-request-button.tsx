@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 type Request = { id: string; sender_id: string; recipient_id: string; status: "pending" | "accepted" | "rejected" };
@@ -76,7 +75,7 @@ export function FriendRequestButton({ profileId, name }: { profileId: string; na
   if (userId === profileId) return null;
   const incoming = request?.status === "pending" && request.recipient_id === userId;
   return <div className="friend-actions">
-    {request?.status === "accepted" ? <><span className="friend-state">✓ Friends</span><Link className="primary" href={`/chat/${profileId}`}>Message</Link></>
+    {request?.status === "accepted" ? <span className="friend-state">✓ Friends</span>
       : incoming ? <><button className="primary" type="button" disabled={busy} onClick={() => void act("accept")}>Accept request</button><button className="quiet-button" type="button" disabled={busy} onClick={() => void act("decline")}>Decline</button></>
       : request?.status === "pending" ? <span className="friend-state">Request sent</span>
       : <button className="primary" type="button" disabled={busy} onClick={() => void act("send")}>{busy ? "Sending…" : "Add friend"}</button>}

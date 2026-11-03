@@ -1,10 +1,11 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { profileInitials } from "@/lib/profile";
-import { type DirectConversation, type DirectMessage } from "@/lib/messaging";
+import { canSendDirectMessage, type DirectConversation, type DirectMessage } from "@/lib/messaging";
 import { useDirectMessages } from "./use-direct-messages";
+import { ProfileSafety } from "./profile-safety";
 
 function messageTime(value: string, compact = false) {
   const date = new Date(value);
@@ -26,20 +27,28 @@ function MessageBubble({ message, outgoing }: { message: DirectMessage; outgoing
 export function ChatScreen({ recipientId }: { recipientId?: string }) {
   const chat = useDirectMessages(recipientId);
   const [query, setQuery] = useState("");
-  const matches = chat.conversations.filter(item => item.display_name.toLowerCase().includes(query.trim().toLowerCase()));
+  const [view, setView] = useState<"inbox" | "requests">("inbox");
+  useEffect(() => {
+    if (chat.active?.status === "pending") setView("requests");
+    else if (chat.active?.status === "accepted") setView("inbox");
+  }, [chat.active?.id, chat.active?.status]);
+  const incomingCount = chat.conversations.filter(item => item.status === "pending" && item.initiated_by !== chat.userId && item.last_content && !item.messaging_blocked).length;
+  const matches = chat.conversations.filter(item => !item.messaging_blocked && (view === "inbox" ? item.status === "accepted" : item.status === "pending" && !!item.last_content)
+    && item.display_name.toLowerCase().includes(query.trim().toLowerCase()));
   return <section className={`messenger chat-layout ${recipientId ? "has-active-chat" : ""}`} aria-label="Messages">
     <aside className="chat-sidebar" aria-label="Conversations">
-      <header className="messenger-heading"><h1>Messages<span className="gold-dot">.</span></h1><Link href="/friends#my-friends" className="messenger-new" aria-label="Find a friend to message" title="Find a friend to message">＋</Link></header>
+      <header className="messenger-heading"><h1>Messages<span className="gold-dot">.</span></h1><Link href="/friends#find-students" className="messenger-new" aria-label="Find a student to message" title="Find a student to message">＋</Link></header>
       <label className="conversation-search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 4.5 4.5" /></svg><span className="sr-only">Search conversations by name</span><input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search conversations" /></label>
+      <div className="message-inbox-tabs" role="group" aria-label="Message folders"><button type="button" aria-pressed={view === "inbox"} onClick={() => setView("inbox")}>Messages</button><button type="button" aria-pressed={view === "requests"} onClick={() => setView("requests")}>Requests{incomingCount > 0 && <span aria-label={`${incomingCount} incoming message requests`}>{incomingCount}</span>}</button></div>
       <nav className="conversation-list" aria-label="Message conversations" aria-busy={chat.loading}>
-        {chat.loading ? <div className="conversation-placeholder" role="status">Loading conversations…</div> : !matches.length ? <div className="conversation-placeholder"><strong>{query.trim() ? "No conversations found" : "No conversations yet"}</strong></div> : matches.map(contact => <Link className={`conversation ${contact.recipient_id === recipientId ? "active" : ""}`} key={contact.id} href={`/chat/${contact.recipient_id}`} scroll={false} aria-current={contact.recipient_id === recipientId ? "page" : undefined}>
-          <Avatar person={contact} /><span className="conversation-copy"><span className="conversation-topline"><strong>{contact.display_name}</strong>{contact.last_created_at && <time dateTime={contact.last_created_at} title={new Date(contact.last_created_at).toLocaleString()}>{messageTime(contact.last_created_at, true)}</time>}</span><small>{contact.last_content ? `${contact.last_sender_id === chat.userId ? "You: " : ""}${contact.last_content}` : "Start a conversation"}</small></span>
+        {chat.loading ? <div className="conversation-placeholder" role="status">Loading conversations…</div> : !matches.length ? <div className="conversation-placeholder"><strong>{query.trim() ? "No conversations found" : view === "requests" ? "No message requests" : "No conversations yet"}</strong></div> : matches.map(contact => <Link className={`conversation ${contact.recipient_id === recipientId ? "active" : ""}`} key={contact.id} href={`/chat/${contact.recipient_id}`} scroll={false} aria-current={contact.recipient_id === recipientId ? "page" : undefined}>
+          <Avatar person={contact} /><span className="conversation-copy"><span className="conversation-topline"><strong>{contact.display_name}</strong>{contact.last_created_at && <time dateTime={contact.last_created_at} title={new Date(contact.last_created_at).toLocaleString()}>{messageTime(contact.last_created_at, true)}</time>}</span><small>{contact.status === "pending" ? contact.initiated_by === chat.userId ? "Sent request · " : "Message request · " : ""}{contact.last_content ? `${contact.last_sender_id === chat.userId ? "You: " : ""}${contact.last_content}` : "Start a conversation"}</small></span>
         </Link>)}
       </nav>
       <p className="messenger-local-note messenger-connection" role="status">{chat.connection === "Connected" && <span className="messenger-connected-dot" aria-hidden="true" />}{chat.connection}</p>
       {chat.error && !recipientId && <MessagingError error={chat.error} retry={chat.retry} />}
     </aside>
-    {recipientId ? chat.active ? <ActiveChat key={chat.active.id} chat={chat} person={chat.active} /> : <div className="chat-panel messenger-welcome"><Link href="/chat" className="text-link">← Back to conversations</Link>{chat.loading ? <p role="status">Loading conversation…</p> : <MessagingError error={chat.error || "Conversation unavailable. Choose an accepted friend to message."} retry={chat.retry} />}</div> : <div className="chat-panel messenger-welcome"><span className="messenger-welcome-icon" aria-hidden="true">✦</span><h2>Your next hello starts here</h2><p>Choose a conversation or visit a friend’s profile to start one.</p><Link className="secondary" href="/friends#my-friends">Find your friends</Link></div>}
+    {recipientId ? chat.active ? <ActiveChat key={chat.active.id} chat={chat} person={chat.active} /> : <div className="chat-panel messenger-welcome"><Link href="/chat" className="text-link">← Back to conversations</Link>{chat.loading ? <p role="status">Loading conversation…</p> : <MessagingError error={chat.error || "Conversation unavailable. Choose a student to message."} retry={chat.retry} />}</div> : <div className="chat-panel messenger-welcome"><span className="messenger-welcome-icon" aria-hidden="true">✦</span><h2>Your next hello starts here</h2><p>Choose a conversation or visit a friend’s profile to start one.</p><Link className="secondary" href="/friends#my-friends">Find your friends</Link></div>}
   </section>;
 }
 function MessagingError({ error, retry }: { error: string; retry: () => void }) {
@@ -52,6 +61,8 @@ function ActiveChat({ person, chat }: { person: DirectConversation; chat: Return
   const composer = useRef<HTMLTextAreaElement>(null);
   const followLatest = useRef(true);
   const prependPosition = useRef<{ height: number; top: number; first: string } | null>(null);
+  const canSend = canSendDirectMessage(person, chat.userId, chat.messages.length);
+  const pendingIncoming = person.status === "pending" && person.initiated_by !== chat.userId;
   const lastMessage = chat.messages.at(-1)?.id;
   const previousLast = useRef(lastMessage);
   function scrollToLatest() {
@@ -96,7 +107,8 @@ function ActiveChat({ person, chat }: { person: DirectConversation; chat: Return
     await chat.loadOlder();
   }
   return <div className="chat-panel">
-    <header className="chat-header"><Link href="/chat" className="chat-mobile-back" aria-label="Back to conversations">←</Link><Link className="host-line large chat-recipient" href={`/profiles/${person.recipient_id}`}><Avatar person={person} /><span><strong>{person.display_name}</strong><small>View profile <span aria-hidden="true">↗</span></small></span></Link></header>
+    <header className="chat-header"><Link href="/chat" className="chat-mobile-back" aria-label="Back to conversations">←</Link><Link className="host-line large chat-recipient" href={`/profiles/${person.recipient_id}`}><Avatar person={person} /><span><strong>{person.display_name}</strong><small>View profile <span aria-hidden="true">↗</span></small></span></Link><ProfileSafety profileId={person.recipient_id} name={person.display_name} /></header>
+    {person.messaging_blocked ? <p className="message-request-banner">Messaging is unavailable for this profile.</p> : person.status === "pending" ? <div className="message-request-banner"><div><strong>{pendingIncoming ? "Message request" : "Message request sent"}</strong><p>{pendingIncoming ? "Accept to reply and move this conversation to Messages." : chat.messages.length ? "Waiting for this student to accept." : "Send one introductory message."}</p></div>{pendingIncoming && <div className="safety-actions"><button className="primary" type="button" disabled={chat.responding} onClick={() => void chat.respond(true)}>Accept</button><button className="secondary" type="button" disabled={chat.responding} onClick={() => void chat.respond(false)}>Decline</button></div>}</div> : person.status === "declined" ? <p className="message-request-banner">This message request was declined.</p> : null}
     {chat.error && <MessagingError error={chat.error} retry={chat.retry} />}
     <div className="message-thread" ref={thread} tabIndex={0} role="log" aria-label={`Conversation with ${person.display_name}`} aria-live="polite" aria-relevant="additions" onScroll={() => {
       const element = thread.current;
@@ -112,9 +124,9 @@ function ActiveChat({ person, chat }: { person: DirectConversation; chat: Return
       }) : <div className="chat-empty"><Avatar person={person} /><h2>Say hello to {person.display_name.split(" ")[0]}</h2><p>This is the start of your conversation.</p></div>}
     </div>
     {showLatest && <button className="chat-jump" type="button" onClick={scrollToLatest}>Jump to latest <span aria-hidden="true">↓</span></button>}
-    <div className="chat-composer"><form className="message-form" onSubmit={event => void send(event)}><label className="sr-only" htmlFor="message">Message {person.display_name}</label><textarea ref={composer} id="message" name="message" rows={1} placeholder={`Message ${person.display_name.split(" ")[0]}…`} maxLength={1000} disabled={!chat.userId} value={draft} onChange={event => setDraft(event.target.value)} onKeyDown={event => {
+    <div className="chat-composer"><form className="message-form" onSubmit={event => void send(event)}><label className="sr-only" htmlFor="message">Message {person.display_name}</label><textarea ref={composer} id="message" name="message" rows={1} placeholder={`Message ${person.display_name.split(" ")[0]}…`} maxLength={1000} disabled={!canSend} value={draft} onChange={event => setDraft(event.target.value)} onKeyDown={event => {
       if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); }
-    }} /><button className="primary" type="submit" aria-label="Send message" disabled={!chat.userId || chat.sending || !draft.trim()}>{chat.sending ? "Sending…" : "Send"}<span aria-hidden="true">↑</span></button></form>
+    }} /><button className="primary" type="submit" aria-label="Send message" disabled={!canSend || chat.sending || !draft.trim()}>{chat.sending ? "Sending…" : "Send"}<span aria-hidden="true">↑</span></button></form>
     {chat.sendError && <p className="messaging-send-error" role="alert">{chat.sendError} Your message is kept above; select Send to retry.</p>}<p className="chat-status">Enter to send · Shift+Enter for a new line</p></div>
   </div>;
 }

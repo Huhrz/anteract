@@ -37,7 +37,12 @@ try {
   assert.equal((await c.rpc('direct_message_history',{thread_id:id})).data.length,0);
   assert.ok((await c.from('messages').insert({id:crypto.randomUUID(),conversation_id:id,sender_id:cid,content:'unauthorized test'})).error);
   assert.ok((await a.from('messages').insert({id:crypto.randomUUID(),conversation_id:id,sender_id:bid,content:'forged sender'})).error);
-  assert.ok((await a.rpc('start_direct_conversation',{recipient:cid})).error);
+  const request=await a.rpc('start_direct_conversation',{recipient:cid});assert.ifError(request.error);
+  assert.ifError((await a.from('messages').insert({id:crypto.randomUUID(),conversation_id:request.data,sender_id:aid,content:`${run} introduction`})).error);
+  assert.ok((await a.from('messages').insert({id:crypto.randomUUID(),conversation_id:request.data,sender_id:aid,content:'Followup before consent'})).error);
+  assert.ok((await c.from('messages').insert({id:crypto.randomUUID(),conversation_id:request.data,sender_id:cid,content:'Reply before consent'})).error);
+  assert.ifError((await c.from('conversations').update({status:'accepted'}).eq('id',request.data)).error);
+  assert.ifError((await c.from('messages').insert({id:crypto.randomUUID(),conversation_id:request.data,sender_id:cid,content:`${run} request accepted`})).error);
   assert.ok((await a.from('conversation_participants').insert({conversation_id:id,user_id:cid})).error);
   for(const content of ['   ','x'.repeat(1001)])assert.ok((await a.from('messages').insert({id:crypto.randomUUID(),conversation_id:id,sender_id:aid,content})).error);
   await b.removeChannel(channel);assert.equal(b.getChannels().length,0,'Subscription leaked after cleanup');

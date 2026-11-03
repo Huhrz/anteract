@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { profilePhotoBucket } from "@/lib/profile";
 import { ProfileCard } from "@/components/profile-card";
-import { FriendRequestButton } from "@/components/friend-request-button";
+import { ProfileActions } from "@/components/profile-actions";
 
 export default async function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -22,7 +22,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
       photoUrl = data.signedUrl;
     }
     return <div className="profile-page">
-      <ProfileCard publicView name={profile.display_name} major={profile.major} year={profile.class_year} bio={profile.bio ?? ""} interests={profile.interests} photoUrl={photoUrl} socialLinks={profile.social_links ?? []} actions={user?.id === profile.id ? <Link className="secondary" href="/profile">Edit profile</Link> : <FriendRequestButton profileId={profile.id} name={profile.display_name} />} />
+      <ProfileCard publicView name={profile.display_name} major={profile.major} year={profile.class_year} bio={profile.bio ?? ""} interests={profile.interests} photoUrl={photoUrl} socialLinks={profile.social_links ?? []} actions={user?.id === profile.id ? <Link className="secondary" href="/profile">Edit profile</Link> : <ProfileActions profileId={profile.id} name={profile.display_name} />} />
     </div>;
   }
   notFound();

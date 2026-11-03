@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { compareMessages, mergeMessages, validMessage, sortConversations, messagingError } from '../src/lib/messaging.ts';
+import { compareMessages, mergeMessages, validMessage, sortConversations, messagingError, canSendDirectMessage } from '../src/lib/messaging.ts';
 const message=(id,created_at='2026-11-03T00:00:00.123456+00:00')=>({id,created_at,conversation_id:'thread',sender_id:'sender',content:id});
 test('REST responses, retries and Realtime events merge into one ordered message per ID',()=>{
   const original=[message('b'),message('a')];
@@ -24,7 +24,18 @@ test('incoming previews reorder conversations without mutating the source list',
   const original=[a,b];assert.deepEqual(sortConversations(original).map(x=>x.id),['b','a']);assert.equal(original[0],a);
 });
 test('authorization and missing migration errors give actionable messages',()=>{
-  assert.match(messagingError({code:'42501'}),/accepted friends/);
+  assert.match(messagingError({code:'42501'}),/accepted first/);
   assert.match(messagingError({code:'PGRST202'}),/migration/);
   assert.match(messagingError(new Error('Offline')),/Offline/);
+});
+
+test('consent gates composing: friends and accepted requests can chat, other senders get one introduction',()=>{
+ const base={status:'accepted',initiated_by:'me',messaging_blocked:false};
+ assert.equal(canSendDirectMessage(base,'me',3),true);
+ assert.equal(canSendDirectMessage({...base,status:'pending'},'me',0),true);
+ assert.equal(canSendDirectMessage({...base,status:'pending'},'me',1),false);
+ assert.equal(canSendDirectMessage({...base,status:'pending'},'recipient',0),false);
+ assert.equal(canSendDirectMessage({...base,status:'declined'},'me',0),false);
+ assert.equal(canSendDirectMessage({...base,messaging_blocked:true},'me',0),false);
+ assert.equal(canSendDirectMessage(base,'',0),false);
 });

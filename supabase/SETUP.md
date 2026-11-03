@@ -71,3 +71,7 @@ Verify with `select bio from public.profiles limit 1;`. In `/profile`, edit the 
 ## Persistent direct messaging (Stage 2)
 
 Review and apply `migrations/20261103050528_direct_messaging.sql` before deploying the updated Messages UI. See [MESSAGING.md](./MESSAGING.md) for schema/RLS details, exact migration and Realtime setup, isolated database tests, and the three-account staging verification procedure. Messaging now requires a verified UCI Supabase session and an accepted friendship; browser-local demo messages are not uploaded.
+
+## Message requests, blocks, and reports
+
+Apply `migrations/20261103054033_message_requests_and_profile_safety.sql` after direct messaging. It adds nonfriend message requests, recipient consent, bilateral messaging/friend-invitation blocks, and private persisted profile reports. Existing messages and conversations are preserved. See [REQUESTS_AND_SAFETY.md](./REQUESTS_AND_SAFETY.md) for behavior, security, setup, and administrator report review.

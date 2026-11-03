@@ -1,7 +1,7 @@
 export const messageLimit = 1000;
 export const historyPageSize = 50;
 export type DirectMessage = { id: string; conversation_id: string; sender_id: string; content: string; created_at: string };
-export type DirectConversation = { id: string; recipient_id: string; display_name: string; avatar_path: string | null; photoUrl?: string; last_content: string | null; last_sender_id: string | null; last_created_at: string | null; created_at: string };
+export type DirectConversation = { id: string; recipient_id: string; display_name: string; avatar_path: string | null; photoUrl?: string; last_content: string | null; last_sender_id: string | null; last_created_at: string | null; created_at: string; status: "pending" | "accepted" | "declined"; initiated_by: string; messaging_blocked: boolean };
 
 // Realtime and REST can use different ISO offsets/precision. Compare instants
 // while preserving Postgres microseconds beyond the precision of JS Date.
@@ -23,8 +23,13 @@ export function validMessage(content: string) {
 }
 export function messagingError(error: unknown) {
   if (error && typeof error === "object" && "code" in error) {
-    if (["42P01", "42883", "PGRST202", "PGRST205"].includes(String(error.code))) return "Messaging setup is incomplete. Please apply the direct messaging migration.";
-    if (error.code === "42501") return "This conversation is unavailable. Only accepted friends can send messages.";
+    if (["42P01", "42883", "PGRST202", "PGRST205"].includes(String(error.code))) return "Messaging setup is incomplete. Apply the latest messaging and profile safety migrations.";
+    if (error.code === "42501") return "Messaging is unavailable, or this message request must be accepted first.";
   }
   return error instanceof Error ? error.message : "Could not connect to messages. Please try again.";
+}
+
+export function canSendDirectMessage(conversation: DirectConversation, userId: string, messageCount: number) {
+  return !!userId && !conversation.messaging_blocked && (conversation.status === "accepted"
+    || (conversation.status === "pending" && conversation.initiated_by === userId && messageCount === 0));
 }

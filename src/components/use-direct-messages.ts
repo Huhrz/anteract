@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { isUciEmail } from "@/lib/supabase/access";
 import { profilePhotoBucket } from "@/lib/profile";
-import { historyPageSize, compareMessages, compareTimestamps, mergeMessages, messagingError, sortConversations, validMessage, type DirectConversation, type DirectMessage } from "@/lib/messaging";
+import { historyPageSize, compareMessages, compareTimestamps, mergeMessages, messagingError, sortConversations, validMessage, canSendDirectMessage, type DirectConversation, type DirectMessage } from "@/lib/messaging";
 
 type Client = ReturnType<typeof createClient>;
 const columns = "id,conversation_id,sender_id,content,created_at";
@@ -21,6 +21,7 @@ export function useDirectMessages(recipientId?: string) {
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
+  const [responding, setResponding] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const currentMessages = useRef<DirectMessage[]>([]);
   const client = useRef<Client | null>(null);
@@ -46,7 +47,7 @@ export function useDirectMessages(recipientId?: string) {
     let catchingUp = false;
     let syncCursor: DirectMessage | undefined;
     setLoading(true); setError(""); setActive(null); setConversations([]); setMessages([]);
-    setUserId(""); setSendError(""); setHasOlder(false); setLoadingOlder(false); setSending(false);
+    setUserId(""); setSendError(""); setHasOlder(false); setLoadingOlder(false); setSending(false); setResponding(false);
     currentMessages.current = []; pending.current = null;
     sendingLock.current = false; olderLock.current = false;
     const valid = () => alive && generation.current === run;
@@ -75,6 +76,7 @@ export function useDirectMessages(recipientId?: string) {
           const { data, error: listError } = await db.rpc("list_direct_conversations").select("*")
             .order("last_created_at", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }).order("id").range(offset, offset + 99);
           if (listError) throw listError;
+          if (data?.some((item: DirectConversation) => !item.status || !item.initiated_by)) throw new Error("Messaging setup is incomplete. Apply the latest message requests and profile safety migration.");
           all.push(...(data ?? []) as DirectConversation[]);
           if (!data || data.length < 100) break;
         }
@@ -145,7 +147,7 @@ export function useDirectMessages(recipientId?: string) {
       }
       const overview = db.channel(`dm-list:${uid}:${run}:${crypto.randomUUID()}`)
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, () => { if (valid()) scheduleList(); })
-        .on("postgres_changes", { event: "INSERT", schema: "public", table: "conversations" }, () => { if (valid()) scheduleList(); })
+        .on("postgres_changes", { event: "*", schema: "public", table: "conversations" }, () => { if (valid()) scheduleList(); })
         .subscribe(status => channelStatus("overview", status));
       const activeChannel = conversationId ? db.channel(`dm-thread:${conversationId}:${run}:${crypto.randomUUID()}`)
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${conversationId}` }, payload => {
@@ -154,10 +156,12 @@ export function useDirectMessages(recipientId?: string) {
       const onFocus = () => { if (!document.hidden && valid()) void sync(); };
       window.addEventListener("focus", onFocus);
       window.addEventListener("online", onFocus);
+      window.addEventListener("profile-safety-changed", onFocus);
       interval = setInterval(onFocus, 30_000);
       cleanup = () => {
         clearTimeout(refreshTimer); clearInterval(interval);
         window.removeEventListener("focus", onFocus); window.removeEventListener("online", onFocus);
+        window.removeEventListener("profile-safety-changed", onFocus);
         auth.data.subscription.unsubscribe();
         void db.removeChannel(overview); if (activeChannel) void db.removeChannel(activeChannel);
       };
@@ -181,7 +185,7 @@ export function useDirectMessages(recipientId?: string) {
   }
   async function send(content: string) {
     const text = content.trim();
-    if (!active || !userId || !client.current || sendingLock.current || !validMessage(text)) return false;
+    if (!active || !userId || !client.current || sendingLock.current || !validMessage(text) || !canSendDirectMessage(active, userId, currentMessages.current.length)) return false;
     sendingLock.current = true; setSending(true); setSendError("");
     const run = generation.current;
     if (!pending.current || pending.current.content !== text || pending.current.conversation !== active.id) pending.current = { id: crypto.randomUUID(), content: text, conversation: active.id };
@@ -202,5 +206,20 @@ export function useDirectMessages(recipientId?: string) {
     } catch (e) { if (generation.current === run) setSendError(messagingError(e)); return false; }
     finally { if (generation.current === run) { sendingLock.current = false; setSending(false); } }
   }
-  return { conversations, active, messages, userId, loading, error, connection, hasOlder, loadingOlder, loadOlder, send, sending, sendError, retry: () => setAttempt(value => value + 1) };
+  async function respond(accept: boolean) {
+    if (!active || !client.current || responding) return;
+    const run = generation.current;
+    setResponding(true); setError("");
+    try {
+      const status = accept ? "accepted" : "declined";
+      const { data, error } = await client.current.from("conversations").update({ status }).eq("id", active.id).eq("status", "pending").select("id").maybeSingle();
+      if (error) throw error;
+      if (!data) throw new Error("This request has already changed. Refresh and try again.");
+      if (run !== generation.current) return;
+      setActive(current => current ? { ...current, status } : current);
+      setConversations(current => current.map(item => item.id === active.id ? { ...item, status } : item));
+    } catch (e) { if (run === generation.current) setError(messagingError(e)); }
+    finally { if (run === generation.current) setResponding(false); }
+  }
+  return { respond, responding, conversations, active, messages, userId, loading, error, connection, hasOlder, loadingOlder, loadOlder, send, sending, sendError, retry: () => setAttempt(value => value + 1) };
 }
