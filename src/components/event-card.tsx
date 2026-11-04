@@ -7,6 +7,8 @@ import type { SharedEvent } from "./event-provider";
 import { useEvents } from "./event-provider";
 import { EventTags } from "./event-tags";
 import { EventLocation } from "./event-location";
+import { useEventPeople } from "./event-people";
+import { ProfileAvatar } from "./profile-avatar";
 
 export function EventCard({ event, variant = "default", past = false }: { event: SharedEvent; variant?: "default" | "personal" | "discovery"; past?: boolean }) {
   const { joinEvent } = useEvents();
@@ -52,9 +54,20 @@ function CompactEventCard({ event, past, discovery, action, error }: { event: Sh
       <time className="personal-event-time" dateTime={event.startsAt}>{event.time}</time>
       <div className="personal-event-location"><EventLocation event={event} /></div>
       {!discovery && event.description && <p className="personal-event-description">{event.description}</p>}
-      {discovery && <><EventTags tags={event.tags} /><Link className="discovery-host" href={`/profiles/${event.hostId}`}>Hosted by {event.hostName}</Link></>}
+      {discovery && <><EventTags tags={event.tags} /><OrganizerProfileButton event={event} /></>}
       <div className="personal-event-footer"><span>{discovery ? `${Math.max(0, event.capacity - event.participants)} spots left` : `${event.participants} / ${event.capacity} ${past ? "participants" : "going"}`}</span><Link href={`/events/${event.id}`} aria-label={`View event: ${event.title}`}>View event <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg></Link>{action}</div>
       {error && <p className="entry-notice" role="alert">{error}</p>}
     </div>
   </article>;
+}
+
+
+function OrganizerProfileButton({ event }: { event: SharedEvent }) {
+  const { people } = useEventPeople(event.hostId, []);
+  const organizer = people.find(person => person.id === event.hostId);
+  const name = organizer?.display_name || event.hostName;
+  return <Link className="discovery-host" href={`/profiles/${event.hostId}`} aria-label={`View organizer profile: ${name}`} title={`Organizer: ${name}`}>
+    <ProfileAvatar name={name} photoUrl={organizer?.photoUrl} />
+    <span>{name}</span><span className="discovery-host-arrow" aria-hidden="true">↗</span>
+  </Link>;
 }
