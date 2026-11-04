@@ -20,9 +20,9 @@ export function CampusMapPanel({ url, label, note }: { url: string; label: strin
         </div>
         <span className="campus-map-badge">Official UCI map</span>
       </div>
-      <p className="campus-map-note">
+      {note && <p className="campus-map-note">
         {note}
-      </p>
+      </p>}
       <iframe
         key={url}
         src={url}

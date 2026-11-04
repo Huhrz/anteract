@@ -148,11 +148,11 @@ export function getCampusMap(locationId?: string, chosenPlace?: CampusMapPlace, 
   const location = validChoice ? {
     label: chosenPlace.label.trim(),
     markerId: chosenPlace.markerId,
-    note: "This pin marks the selected campus location. Follow the host’s meeting instructions for the exact gathering spot.",
+    note: "",
   } : preset ?? (namedPlace ? {
     label: namedPlace.label,
     markerId: namedPlace.markerId,
-    note: "This pin marks the selected campus location. Follow the host’s meeting instructions for the exact gathering spot.",
+    note: "",
   } : undefined);
   return {
     url: location
