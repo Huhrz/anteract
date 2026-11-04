@@ -8,12 +8,13 @@ import { useEvents } from "./event-provider";
 import { EventTags } from "./event-tags";
 import { EventLocation } from "./event-location";
 
-export function EventCard({ event }: { event: SharedEvent }) {
+export function EventCard({ event, variant = "default", past = false }: { event: SharedEvent; variant?: "default" | "personal"; past?: boolean }) {
   const { joinEvent } = useEvents();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const joined = event.isJoined;
   const full = event.participants >= event.capacity;
+  if (variant === "personal") return <PersonalEventCard event={event} past={past} />;
   return <article className="card">
     <Link className={`card-art ${eventCategoryTone(event.category)}`} href={`/events/${event.id}`} aria-label={`Details for ${event.title}`}><span aria-hidden="true">{eventCategorySymbol(event.category)}</span><span className="category-label">{event.category}</span></Link>
     <div className="card-body">
@@ -28,6 +29,25 @@ export function EventCard({ event }: { event: SharedEvent }) {
         finally { setBusy(false); }
       }}>{full ? "Full" : busy ? "Joining…" : "Join"}</button>}</div></div>
       {error && <p className="entry-notice" role="alert">{error}</p>}
+    </div>
+  </article>;
+}
+
+
+function PersonalEventCard({ event, past }: { event: SharedEvent; past: boolean }) {
+  const date = new Date(event.startsAt);
+  return <article className="personal-event-card">
+    <Link className={`personal-event-art ${eventCategoryTone(event.category)}`} href={`/events/${event.id}`} aria-label={`Details for ${event.title}`} tabIndex={-1}>
+      <time className="personal-event-date" dateTime={event.startsAt}><span>{date.toLocaleDateString(undefined, { month: "short" })}</span><strong>{date.getDate()}</strong></time>
+      <span className="personal-event-category">{event.category}</span><span className="personal-event-symbol" aria-hidden="true">{eventCategorySymbol(event.category)}</span>
+    </Link>
+    <div className="personal-event-body">
+      <div className="personal-event-badges"><span className={`personal-event-role ${event.isHost ? "hosting" : "attending"}`}>{event.isHost ? "Hosting" : "Attending"}</span>{past && <span className="personal-event-past">Past event</span>}</div>
+      <h3><Link href={`/events/${event.id}`}>{event.title}</Link></h3>
+      <time className="personal-event-time" dateTime={event.startsAt}>{event.time}</time>
+      <div className="personal-event-location"><EventLocation event={event} /></div>
+      {event.description && <p className="personal-event-description">{event.description}</p>}
+      <div className="personal-event-footer"><span>{event.participants} / {event.capacity} {past ? "participants" : "going"}</span><Link href={`/events/${event.id}`} aria-label={`View event: ${event.title}`}>View event <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg></Link></div>
     </div>
   </article>;
 }

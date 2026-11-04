@@ -84,7 +84,10 @@ export default function NewEventForm() {
     } finally { setSaving(false); }
   }
   return <section className="event-creation-page">
-    <Link className="back-link" href="/events">← Browse events</Link>
+    <Link className="back-link event-back-link" href="/events">
+      <span className="event-back-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m12 5-7 7 7 7M5 12h14" /></svg></span>
+      <span>Browse events</span>
+    </Link>
     <header className="event-creation-heading"><div><h1>Create an event</h1></div><button ref={previewButton} className="secondary event-mobile-preview" type="button" onClick={() => previewDialog.current?.showModal()}>Preview <span aria-hidden="true">↗</span></button></header>
     <div className="event-creation-layout">
       <form className="event-creation-form" aria-busy={saving} noValidate onSubmit={event => void submit(event)}>
