@@ -7,6 +7,7 @@ import type { Category, Hangout } from "@/lib/hangouts";
 
 export type SharedEvent = Hangout & {
   startsAt: string;
+  createdAt?: string;
   hostName: string;
   isJoined: boolean;
   isHost: boolean;
@@ -75,6 +76,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
           location: row.location,
           time: formatEventTime(row.starts_at),
           startsAt: row.starts_at,
+          createdAt: row.created_at,
           tags: Array.isArray(row.tags) ? row.tags : [],
           description: row.description,
           participants: members.length + 1,

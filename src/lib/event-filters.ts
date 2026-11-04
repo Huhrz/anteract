@@ -42,3 +42,15 @@ export function eventCategoryOptions(events: readonly { category: string }[], se
   }
   return [...names.values()];
 }
+
+export type EventSort = "soonest" | "newest" | "spots";
+
+/** Sort a filtered snapshot without mutating the shared provider data. */
+export function sortEvents<T extends { id: string; startsAt: string; createdAt?: string; participants: number; capacity: number }>(events: readonly T[], sort: EventSort): T[] {
+  const timestamp = (value?: string) => value && Number.isFinite(Date.parse(value)) ? Date.parse(value) : 0;
+  return [...events].sort((a, b) => {
+    const primary = sort === "newest" ? timestamp(b.createdAt) - timestamp(a.createdAt)
+      : sort === "spots" ? Math.max(0, b.capacity - b.participants) - Math.max(0, a.capacity - a.participants) : 0;
+    return primary || timestamp(a.startsAt) - timestamp(b.startsAt) || a.id.localeCompare(b.id);
+  });
+}
