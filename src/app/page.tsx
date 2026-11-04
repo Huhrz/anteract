@@ -2,11 +2,8 @@
 
 import Link from "next/link";
 import { Reveal } from "@/components/reveal";
-import { EventCard } from "@/components/event-card";
-import { useEvents } from "@/components/event-provider";
 
 export default function Home() {
-  const { events, loading } = useEvents();
   return <div className="home-page">
     <section className="hero" aria-labelledby="page-title">
       <p className="eyebrow">YOUR CAMPUS. YOUR PEOPLE.</p>
@@ -21,9 +18,5 @@ export default function Home() {
       <div><span className="step-number">03</span><div><strong>Say hello</strong><p>Chat with your group before you meet.</p></div></div>
     </section>
     </Reveal>
-    <section className="activities" aria-labelledby="hangouts-title">
-      <Reveal><div className="section-heading"><div><p className="eyebrow">A LITTLE INSPIRATION</p><h2 id="hangouts-title">Good plans, better company.</h2></div><Link className="text-link" href="/events">Browse all events →</Link></div></Reveal>
-      {loading ? <p className="loading-state" role="status">Loading events…</p> : events.length ? <div className="cards home-cards">{events.slice(0, 3).map((event, index) => <Reveal key={event.id} delay={index * 70}><EventCard event={event} /></Reveal>)}</div> : <p className="body-copy">No events yet. <Link className="text-link" href="/events/new">Create the first event →</Link></p>}
-    </section>
   </div>;
 }
