@@ -1172,12 +1172,14 @@ html { scroll-padding-top: 120px; }
 .profile-connect-actions > .primary, .profile-connect-actions .friend-actions > :is(.primary,.quiet-button) { min-height: 42px; padding: 10px 16px; border-radius: 12px; font-size: 12px; }
 .profile-connect-actions .friend-actions > .primary { background: var(--surface); color: var(--navy); border: 1px solid var(--line); }
 .profile-connect-actions .friend-state { padding: 10px 12px; font-size: 12px; }
-.public-profile-actions > .profile-safety > .safety-actions { gap: 6px; flex-wrap: nowrap; }
-.public-profile-actions > .profile-safety > .safety-actions > button { min-height: 40px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--page); font-size: 12px; text-decoration: none; }
-.public-profile-actions > .profile-safety > .safety-actions > button:hover { background: var(--soft); }
+.public-profile-actions > .profile-safety > .safety-actions,
+.messenger .chat-header > .profile-safety > .safety-actions { gap: 6px; flex-wrap: nowrap; }
+.public-profile-actions > .profile-safety > .safety-actions > button,
+.messenger .chat-header > .profile-safety > .safety-actions > button { min-height: 40px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--page); font-size: 12px; text-decoration: none; }
+.public-profile-actions > .profile-safety > .safety-actions > button:hover,
+.messenger .chat-header > .profile-safety > .safety-actions > button:hover { background: var(--soft); }
 .public-profile-actions > .profile-safety { display: flex; flex-direction: column; align-items: flex-end; margin-left: auto; }
 .messenger .chat-header > .profile-safety { margin-left: auto; }
-.messenger .profile-safety .quiet-button { font-size: 11px; }
 .messenger .message-form textarea:disabled { cursor: not-allowed; opacity: .65; }
 @media (max-width: 700px) {
   .message-request-banner { align-items: flex-start; flex-direction: column; padding: 12px 14px; }
