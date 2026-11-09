@@ -88,7 +88,7 @@ export default function NewEventForm() {
       <span className="event-back-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m12 5-7 7 7 7M5 12h14" /></svg></span>
       <span>Browse events</span>
     </Link>
-    <header className="event-creation-heading"><div><h1>Create an event</h1></div><button ref={previewButton} className="secondary event-mobile-preview" type="button" onClick={() => previewDialog.current?.showModal()}>Preview <span aria-hidden="true">↗</span></button></header>
+    <header className="event-creation-heading"><div><h1>Create an event</h1><p className="creation-limit-note">You can post up to 3 events each day (UTC).</p></div><button ref={previewButton} className="secondary event-mobile-preview" type="button" onClick={() => previewDialog.current?.showModal()}>Preview <span aria-hidden="true">↗</span></button></header>
     <div className="event-creation-layout">
       <form className="event-creation-form" aria-busy={saving} noValidate onSubmit={event => void submit(event)}>
         <fieldset disabled={saving || published} className="event-form-section"><legend><span>01</span> Event Basics</legend>

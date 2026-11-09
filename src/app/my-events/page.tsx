@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { EventCard } from "@/components/event-card";
 import { useEvents } from "@/components/event-provider";
-import { groupMyEvents } from "@/lib/my-events";
+import { EVENT_POINTS, groupMyEvents, pointsProgress } from "@/lib/my-events";
 
 const tabs = [
   { id: "upcoming", label: "Upcoming", summary: "Upcoming events", icon: "/upcoming.png", detail: "Your next campus plans", empty: "Your next plan is out there.", message: "Find something you’re into and make it part of your week.", href: "/events", action: "Browse events" },
@@ -26,6 +26,7 @@ export default function MyEvents() {
     return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", update); };
   }, []);
   const groups = groupMyEvents(events, now ?? 0);
+  const rewards = pointsProgress(groups.past.length * EVENT_POINTS);
   const pending = now === null || (loading && events.length === 0);
   const unavailable = !!error && events.length === 0;
 
@@ -44,6 +45,18 @@ export default function MyEvents() {
   return <div className="my-events-dashboard">
     <header className="my-events-heading"><h1>My events</h1><Link className="primary" href="/events/new"><span aria-hidden="true">+</span> Create an event</Link></header>
     <dl className="my-events-overview" aria-label="Your event overview">{tabs.map(tab => <div key={tab.id} className={`my-events-stat ${tab.id}`}><dt><span className="my-events-stat-icon" aria-hidden="true"><img className="my-events-category-icon" src={tab.icon} alt="" width="38" height="38" /></span>{tab.summary}</dt><dd>{pending || unavailable ? <span aria-label="Count unavailable">—</span> : groups[tab.id].length}</dd></div>)}</dl>
+    <section className={`event-rewards tier-${rewards.tier.toLowerCase().replaceAll(" ", "-")}`} aria-labelledby="event-rewards-title" aria-busy={pending}>
+      <div className="event-rewards-copy">
+        <p className="event-rewards-eyebrow">Your campus impact</p>
+        <h2 id="event-rewards-title">{pending || unavailable ? "Event rewards" : `${rewards.tier} ${rewards.tier === "Getting started" ? "journey" : "tier"}`}</h2>
+        <p>{pending || unavailable ? "Your points are currently unavailable." : `${rewards.points} points · ${EVENT_POINTS} points for each past event you joined or hosted.`}</p>
+      </div>
+      <div className="event-rewards-progress">
+        <div className="event-rewards-label"><strong>{pending || unavailable ? "—" : `${rewards.points} pts`}</strong><span>{pending || unavailable ? "—" : rewards.nextTier === null ? "Top tier reached" : `${rewards.pointsToNextTier} to ${rewards.nextTier === 200 ? "Silver" : rewards.nextTier === 350 ? "Gold" : "Bronze"}`}</span></div>
+        <div className="event-rewards-track" role="progressbar" aria-label="Progress toward the next event reward tier" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pending || unavailable ? 0 : Math.round(rewards.progress)}><span style={{ width: `${pending || unavailable ? 0 : rewards.progress}%` }} /></div>
+        <div className="event-rewards-tiers"><span className={rewards.points >= 100 ? "earned" : ""}>Bronze · 100</span><span className={rewards.points >= 200 ? "earned" : ""}>Silver · 200</span><span className={rewards.points >= 350 ? "earned" : ""}>Gold · 350</span></div>
+      </div>
+    </section>
     {error && <div className="my-events-error" role="alert"><div><strong>{unavailable ? "Your events couldn’t be loaded." : "Couldn’t refresh your events. Showing the last loaded plans."}</strong><p>{error}</p></div><button className="secondary" type="button" disabled={loading} onClick={() => void refresh()}>{loading ? "Retrying…" : "Try again"}</button></div>}
     <div className="my-events-tabs" role="tablist" aria-label="My event lists">{tabs.map((tab, index) => <button key={tab.id} ref={element => { controls.current[index] = element; }} type="button" role="tab" id={`my-events-tab-${tab.id}`} aria-controls={`my-events-panel-${tab.id}`} aria-selected={active === tab.id} tabIndex={active === tab.id ? 0 : -1} onClick={() => setActive(tab.id)} onKeyDown={event => navigateTabs(event, index)}>{tab.label}<span aria-hidden="true">{pending || unavailable ? "—" : groups[tab.id].length}</span></button>)}</div>
     {loading && !pending && <p className="my-events-updating" role="status">Updating your plans…</p>}
