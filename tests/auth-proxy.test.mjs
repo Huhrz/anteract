@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { stripTypeScriptTypes } from 'node:module';
 import { isUciEmail } from '../src/lib/supabase/access.ts';
 
-const source=stripTypeScriptTypes(readFileSync(new URL('../src/proxy.ts',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export async function proxy','async function proxy').replace('export const config','const config');
+const source=stripTypeScriptTypes(readFileSync(new URL('../src/proxy.ts',import.meta.url),'utf8')).replace(/^import .*;\r?\n/gm,'').replace('export async function proxy','async function proxy').replace('export const config','const config');
 async function visit(user,configured=true){
  const response=(kind,url)=>({kind,url,cookies:{getAll:()=>[],set(){}}});
  const proxy=new Function('createServerClient','NextResponse','isUciEmail','process',`${source};return proxy;`)(

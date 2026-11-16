@@ -5,7 +5,7 @@ import { stripTypeScriptTypes } from "node:module";
 
 // Execute the actual route with isolated Auth/Storage doubles; never delete a live account.
 const source = stripTypeScriptTypes(readFileSync(new URL("../src/app/api/account/route.ts", import.meta.url), "utf8"))
-  .replace(/^import .*;\n/gm, "").replace("export async function DELETE", "async function DELETE");
+  .replace(/^import .*;\r?\n/gm, "").replace("export async function DELETE", "async function DELETE");
 function setup({ user = { id: "caller", email: "student@uci.edu", email_confirmed_at: "today" }, failRemove = false, failSignOut = false } = {}) {
   const calls = [];
   let listed = false;

@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
 import { stripTypeScriptTypes } from 'node:module';
 import * as helpers from '../src/lib/messaging.ts';
-const source=stripTypeScriptTypes(readFileSync(new URL('../src/components/use-direct-messages.ts',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function useDirectMessages','function useDirectMessages');
+const source=stripTypeScriptTypes(readFileSync(new URL('../src/components/use-direct-messages.ts',import.meta.url),'utf8')).replace(/^import .*;\r?\n/gm,'').replace('export function useDirectMessages','function useDirectMessages');
 const row=(id='message-1')=>({id,conversation_id:'thread-a',sender_id:'me',content:'Hello',created_at:'2026-11-03T00:00:00.123456+00:00'});
 function harness({failInsert=false}={}){
   const slots=[],effects=[],channels=[],removed=[],inserts=[],rpcCalls=[];
