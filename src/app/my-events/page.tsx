@@ -50,6 +50,7 @@ export default function MyEvents() {
         <p className="event-rewards-eyebrow">Your campus impact</p>
         <h2 id="event-rewards-title">{pending || unavailable ? "Event rewards" : `${rewards.tier} ${rewards.tier === "Getting started" ? "journey" : "tier"}`}</h2>
         <p>{pending || unavailable ? "Your points are currently unavailable." : `${rewards.points} points · ${EVENT_POINTS} points for each past event you joined or hosted.`}</p>
+        <details className="event-rewards-help"><summary>How points work</summary><p>A joined or hosted plan adds {EVENT_POINTS} points once its start time has passed. Points reflect your current event history; they don’t verify attendance. Leaving a plan or having it canceled can change your total.</p><Link className="text-link" href="/help#points">More about event rewards ↗</Link></details>
       </div>
       <div className="event-rewards-progress">
         <div className="event-rewards-label"><strong>{pending || unavailable ? "—" : `${rewards.points} pts`}</strong><span>{pending || unavailable ? "—" : rewards.nextTier === null ? "Top tier reached" : `${rewards.pointsToNextTier} to ${rewards.nextTier === 200 ? "Silver" : rewards.nextTier === 350 ? "Gold" : "Bronze"}`}</span></div>

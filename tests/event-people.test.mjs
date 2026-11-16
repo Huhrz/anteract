@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
 import { stripTypeScriptTypes } from 'node:module';
 
-const source = stripTypeScriptTypes(readFileSync(new URL('../src/components/event-people.tsx', import.meta.url), 'utf8').split('export function EventPersonLink')[0].replace(/^import .*;\n/gm, '')).replace('export function useEventPeople', 'function useEventPeople');
+const source = stripTypeScriptTypes(readFileSync(new URL('../src/components/event-people.tsx', import.meta.url), 'utf8').split('export function EventPersonLink')[0].replace(/^import .*;\r?\n/gm, '')).replace('export function useEventPeople', 'function useEventPeople');
 function harness(query) {
   const slots = [], effects = [], calls = [], photos = [];
   let index = 0, result;

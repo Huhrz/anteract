@@ -81,6 +81,7 @@ export function AccountSettings() {
       {storageNotice && <p className="small-note" role="status">{storageNotice}</p>}
       <div className="settings-actions">
         <Link href="/profile" onClick={() => setOpen(false)}>Profile <span aria-hidden="true">↗</span></Link>
+        <Link href="/help" onClick={() => setOpen(false)}>Quick start &amp; tips <span aria-hidden="true">↗</span></Link>
           <button disabled={busy} onClick={logout}>{busy ? "Please wait…" : "Log out"}<span aria-hidden="true">↗</span></button>
           <button className="settings-danger" disabled={busy} onClick={() => { setError(""); setConfirmation(""); dialog.current?.showModal(); }}>Delete account <span aria-hidden="true">×</span></button>
       </div>

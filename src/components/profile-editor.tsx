@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useEvents } from "./event-provider";
+import { useGettingStarted } from "./getting-started-provider";
 import { ProfilePreview } from "./profile-preview";
 import { SocialLinksEditor } from "./social-links-editor";
 import { parseSocialLinks, type SocialLink } from "@/lib/social-links";
@@ -28,6 +29,7 @@ function errorMessage(error: unknown, fallback: string) {
 export default function ProfileEditor() {
   const router = useRouter();
   const { refresh: refreshEvents } = useEvents();
+  const { completeProfile, progress: guideProgress } = useGettingStarted();
   const fileInput = useRef<HTMLInputElement>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [baseline, setBaseline] = useState(snapshot(emptyDraft, []));
@@ -150,6 +152,7 @@ export default function ProfileEditor() {
       const updated = { id: userId, display_name: displayName, major, class_year: classYear, bio, interests, social_links: parsedSocials.links, avatar_path: uploadedPath };
       const { data, error: saveError } = await supabase.from("profiles").upsert(updated).select("*").single();
       if (saveError) throw saveError;
+      completeProfile(data);
 
       // Profile writes also change event host names and previously visited profile pages.
       router.refresh();
@@ -235,7 +238,7 @@ export default function ProfileEditor() {
           </section>
           <section className="profile-edit-section" aria-label="Social Links"><SocialLinksEditor value={socialLinks} onChange={links => { setSocialLinks(links); setError(""); setNotice(""); }} disabled={saving} /></section>
         </fieldset>
-        <div className="profile-feedback">{error && <p className="entry-notice" role="alert">{error}</p>}{notice && <p className="entry-notice" role="status">{notice}</p>}</div>
+        <div className="profile-feedback">{error && <p className="entry-notice" role="alert">{error}</p>}{notice && <p className="entry-notice" role="status">{notice}</p>}{notice && !guideProgress.join && <Link className="text-link profile-next-plan" href="/events">Find your first plan ↗</Link>}</div>
       </form>
 
     </div>

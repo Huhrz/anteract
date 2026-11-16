@@ -25,7 +25,8 @@ npx --yes pnpm@11.25.0 build
 
 | Screen | Route | What to try |
 | --- | --- | --- |
-| Home | `/` | Navigate to Browse Events or My Events. |
+| Home | `/` | Follow the optional four-step quick start, or explore freely. |
+| Quick start and tips | `/help` | Reopen the guide and read tips for events, locations, messages, hosting, and points. |
 | Browse Events | `/events` | Filter/search shared events; create an event or press Join. |
 | Create event | `/events/new` | Create a UCI event with a date, capacity, and meeting details. |
 | Event details | `/events/<id>` | See event information, join/leave, and cancel an event you host. |
@@ -59,28 +60,33 @@ The real event creation form also offers 93 campus location suggestions: the six
 
 - `src/app/page.tsx`: Home.
 - `src/app/events/`: Browse Events and event detail routes.
-- `src/app/my-events/page.tsx`: agenda and attendance controls.
+- `src/app/my-events/page.tsx`: joined and hosted plans, event history, and rewards.
 - `src/app/profiles/` and `src/app/chat/`: profile and chat routes.
 - `src/components/event-card.tsx`: shared event cards and Join button.
 - `src/components/event-provider.tsx`: shared event queries and actions.
-- `src/components/demo-provider.tsx`: local demo state for chat and safety controls.
-- `src/lib/demo-state.ts`: local demo message and safety transitions.
-- `src/lib/hangouts.ts`: event categories and fictional profiles.
+- `src/components/getting-started-provider.tsx`: account-scoped quick-start milestones and browser preferences.
+- `src/components/getting-started.tsx` and `src/app/help/page.tsx`: the first-use guide and reusable help.
+- `src/components/use-direct-messages.ts`: persistent conversations and consent rules.
+- `src/lib/hangouts.ts`: shared event types and category presentation.
 - `src/app/globals.css`: shared blue/gold styling and responsive layouts.
 
 ## Backend handoff
 
-Authentication, profiles, event creation, browsing, memberships, and capacity enforcement use Supabase after their migrations are applied. Messages only appear in the sender's own browser; there are no automated fake replies.
+Authentication, profiles, event creation, browsing, memberships, messages, blocks, and reports use Supabase after their migrations are applied. Follow `supabase/SETUP.md`, `supabase/MESSAGING.md`, and `supabase/REQUESTS_AND_SAFETY.md` for the current setup and verification steps.
 
-Keep event writes in Supabase and preserve database-side authorization and capacity checks. Messaging, moderation reports/blocks, and attendance confirmation remain demo-only; do not treat browser state as enforcement or delivery for real conversations.
+Keep writes in Supabase and preserve database-side authorization, consent, block, and capacity checks. Joining reserves an event membership; there is no separate attendance confirmation or event group chat. Current rewards count joined or hosted events after their start time, without verifying physical attendance.
 
 ## Account safety
 
-Profiles and chats offer Report account and Block account controls. Reports require a reason, allow up to 2,000 characters of optional details, and offer blocking in the same step. A confirmation explains blocking before it is applied. Unblock from the same profile or chat. Blocking disables composing and sending messages, including in the shared state reducer, and marks the conversation as blocked. Existing messages and shared event attendance remain available.
+Profiles and chats offer Report account and Block account controls. Reports require a reason and allow optional details. Reports and blocks persist in Supabase after the safety migration is applied. Blocks prevent messages in both directions and prevent new friend invitations; existing message history remains available. Reports require administrator review through the configured private moderation workflow. See `supabase/REQUESTS_AND_SAFETY.md` for the exact behavior and setup.
 
-Blocks and reports persist in this browser alongside the agenda. These are demo controls: reports are not delivered to moderators and blocks do not affect another device or person. If storage fails, changes last only for this session.
+## Quick start and help
 
-For production, authenticate the acting account on the server, store reports in a private moderation queue with access controls, and enforce blocks on both message delivery and conversation access in both directions. Never rely on browser state for enforcement or disclose the reporter to the reported account.
+The home page offers an optional four-step guide: save a name and interest, browse events, join or host a plan, then find it in My Events. Milestones reflect actual saved profile data and event memberships; merely opening My Events before having a plan does not complete the final step. Completed actions remain checked if a student later leaves an event.
+
+Students can hide the guide and reopen it from Home or from **Quick start & tips** in the account menu. `/help` always displays the guide and explains filtering, joining/leaving, meeting locations, private message requests, hosting, and rewards. It requires the same verified UCI login as the other app pages.
+
+Guide progress and visibility are saved per account in this browser. If storage is unavailable, progress lasts for the current page visit; app actions still work. These preferences do not provide authentication or grant access to app data. This update requires no new database migration or environment variables.
 
 ## Event discovery
 
