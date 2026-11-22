@@ -1383,6 +1383,8 @@ html { scroll-padding-top: 120px; }
 .ed-capacity progress::-webkit-progress-value { background: var(--navy); border-radius: 999px; }
 .ed-capacity progress::-moz-progress-bar { background: var(--navy); border-radius: 999px; }
 .ed-action-card .full-width { min-height: 46px; border-radius: 12px; }
+.event-calendar-link { margin-top: 10px; gap: 8px; min-height: 44px; font-size: 12px; }
+.event-calendar-link svg { flex-shrink: 0; }
 .ed-action-card .ed-empty { margin: 0 0 16px; }
 .ed-management { margin-top: 14px; }
 .ed-cancel { width: 100%; min-height: 44px; border: 1px solid color-mix(in srgb, var(--danger) 40%, var(--line)); color: var(--danger); background: var(--surface); border-radius: 10px; font: inherit; font-size: 12px; }
