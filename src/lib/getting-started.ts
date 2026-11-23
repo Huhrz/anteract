@@ -1,8 +1,8 @@
 export const guideSteps = [
-  { id: "profile", title: "Make it you", description: "Save your name and an interest so other students can get to know you.", href: "/profile", action: "Set up your profile" },
-  { id: "browse", title: "Find your people", description: "Explore upcoming plans. Try a category, a keyword, or an interest tag.", href: "/events", action: "Browse events" },
-  { id: "join", title: "Make a plan", description: "Open an event with available spots and choose Join event. Hosting counts too.", href: "/events", action: "Find a plan to join" },
-  { id: "plans", title: "Keep it handy", description: "Find your joined or hosted plan in My Events, with the time and meeting details.", href: "/my-events", action: "View My Events" },
+  { id: "profile", title: "Set up your profile", instruction: "Save your name and at least one interest.", href: "/profile" },
+  { id: "browse", title: "Browse events", instruction: "Look through upcoming activities on campus.", href: "/events" },
+  { id: "join", title: "Join an event", instruction: "Open a plan with space and select Join event. Hosting counts too.", href: "/events" },
+  { id: "plans", title: "Open My Events", instruction: "Find the time and meeting details for your plan.", href: "/my-events" },
 ] as const;
 
 export type GuideStep = typeof guideSteps[number]["id"];
